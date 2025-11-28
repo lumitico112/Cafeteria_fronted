@@ -1,0 +1,134 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-receipt me-2 text-secondary"></i>Gestión de Pedidos</h2>
+  <button class="btn btn-outline-primary" (click)="loadPedidos()">
+    <i class="fas fa-sync-alt me-2"></i>Actualizar
+  </button>
+</div>
+
+<!-- Filtros de Estado -->
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-sm rounded-pill" 
+              [class.btn-primary]="selectedEstado === ''"
+              [class.btn-outline-secondary]="selectedEstado !== ''"
+              (click)="filterByEstado('')">
+        Todos
+      </button>
+      <button class="btn btn-sm rounded-pill" 
+              [class.btn-warning]="selectedEstado === 'PENDIENTE'"
+              [class.btn-outline-warning]="selectedEstado !== 'PENDIENTE'"
+              (click)="filterByEstado('PENDIENTE')">
+        Pendientes
+      </button>
+      <button class="btn btn-sm rounded-pill" 
+              [class.btn-info]="selectedEstado === 'PREPARACION'"
+              [class.btn-outline-info]="selectedEstado !== 'PREPARACION'"
+              (click)="filterByEstado('PREPARACION')">
+        En Preparación
+      </button>
+      <button class="btn btn-sm rounded-pill" 
+              [class.btn-primary]="selectedEstado === 'LISTO'"
+              [class.btn-outline-primary]="selectedEstado !== 'LISTO'"
+              (click)="filterByEstado('LISTO')">
+        Listos
+      </button>
+      <button class="btn btn-sm rounded-pill" 
+              [class.btn-success]="selectedEstado === 'ENTREGADO'"
+              [class.btn-outline-success]="selectedEstado !== 'ENTREGADO'"
+              (click)="filterByEstado('ENTREGADO')">
+        Entregados
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Grid de Pedidos -->
+<div class="row g-4">
+  <div class="col-md-6 col-lg-4" *ngFor="let pedido of filteredPedidos">
+    <div class="card h-100 border-start-4 shadow-sm" 
+         [ngClass]="{
+           'border-warning': pedido.estado === 'PENDIENTE',
+           'border-info': pedido.estado === 'PREPARACION',
+           'border-primary': pedido.estado === 'LISTO',
+           'border-success': pedido.estado === 'ENTREGADO',
+           'border-danger': pedido.estado === 'CANCELADO'
+         }">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <span class="fw-bold">Pedido #{{ pedido.idPedido }}</span>
+        <span class="badge" 
+              [ngClass]="{
+                'bg-warning text-dark': pedido.estado === 'PENDIENTE',
+                'bg-info text-white': pedido.estado === 'PREPARACION',
+                'bg-primary': pedido.estado === 'LISTO',
+                'bg-success': pedido.estado === 'ENTREGADO',
+                'bg-danger': pedido.estado === 'CANCELADO'
+              }">
+          {{ pedido.estado }}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <small class="text-muted d-block mb-1">Cliente</small>
+          <h6 class="mb-0"><i class="fas fa-user me-2 text-secondary"></i>{{ pedido.nombreCliente }}</h6>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-6">
+            <small class="text-muted d-block mb-1">Fecha</small>
+            <span>{{ pedido.fecha | date:'short' }}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block mb-1">Tipo</small>
+            <span>{{ pedido.tipoEntrega }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+          <span class="text-muted">{{ pedido.detalles.length }} items</span>
+          <h5 class="mb-0 text-primary fw-bold">S/ {{ pedido.total | number:'1.2-2' }}</h5>
+        </div>
+      </div>
+      <div class="card-footer bg-white py-3">
+        <div class="d-grid gap-2">
+          <a [routerLink]="['/pedidos/detalle', pedido.idPedido]" class="btn btn-outline-primary btn-sm">
+            Ver Detalle
+          </a>
+          
+          <div class="btn-group" *ngIf="pedido.estado !== 'ENTREGADO' && pedido.estado !== 'CANCELADO'">
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+              Cambiar Estado
+            </button>
+            <ul class="dropdown-menu">
+              <li *ngIf="pedido.estado === 'PENDIENTE'">
+                <button class="dropdown-item" (click)="updateEstado(pedido, 'PREPARACION')">
+                  <i class="fas fa-fire text-info me-2"></i>Preparar
+                </button>
+              </li>
+              <li *ngIf="pedido.estado === 'PREPARACION'">
+                <button class="dropdown-item" (click)="updateEstado(pedido, 'LISTO')">
+                  <i class="fas fa-check text-primary me-2"></i>Listo
+                </button>
+              </li>
+              <li *ngIf="pedido.estado === 'LISTO'">
+                <button class="dropdown-item" (click)="updateEstado(pedido, 'ENTREGADO')">
+                  <i class="fas fa-box text-success me-2"></i>Entregar
+                </button>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <button class="dropdown-item text-danger" (click)="updateEstado(pedido, 'CANCELADO')">
+                  <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isLoading && filteredPedidos.length === 0" class="alert alert-info text-center mt-4">
+  No hay pedidos con el estado seleccionado.
+</div>

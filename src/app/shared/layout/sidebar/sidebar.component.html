@@ -1,0 +1,43 @@
+<div class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white">
+  <div class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+    <span class="fs-4"><i class="fas fa-coffee me-2"></i>Menu</span>
+  </div>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    @for (item of [
+      { link: '/dashboard', icon: 'fas fa-tachometer-alt', label: 'Dashboard' },
+      { link: '/productos', icon: 'fas fa-coffee', label: 'Productos' },
+      { link: '/categorias', icon: 'fas fa-tags', label: 'Categorías' },
+      { link: '/pedidos', icon: 'fas fa-receipt', label: 'Pedidos' },
+      { link: '/inventario', icon: 'fas fa-boxes', label: 'Inventario' },
+      { link: '/usuarios', icon: 'fas fa-users', label: 'Usuarios' },
+      { link: '/promociones', icon: 'fas fa-percent', label: 'Promociones' },
+      { link: '/reportes', icon: 'fas fa-chart-bar', label: 'Reportes' }
+    ]; track item.label) {
+      <li class="nav-item">
+        <a [routerLink]="item.link" routerLinkActive="active" class="nav-link text-white">
+          <i [class]="item.icon + ' me-2'"></i>
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+  <hr>
+  <div class="dropdown">
+    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="fas fa-user-circle fa-2x me-2"></i>
+      <strong>
+        @if (currentUser$ | async; as user) {
+          {{ user.sub }}
+        } @else {
+          Usuario
+        }
+      </strong>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+      <li><a class="dropdown-item" href="#">Perfil</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="#" (click)="logout($event)">Cerrar Sesión</a></li>
+    </ul>
+  </div>
+</div>

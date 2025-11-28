@@ -1,0 +1,1234 @@
+# ========================================
+# DOCUMENTACIÓN API REST - SISTEMA POS CAFETERÍA
+# Backend Spring Boot para Frontend Angular
+# ========================================
+
+## 🚀 INICIO RÁPIDO
+
+1. **Crear base de datos**: Ejecutar script SQL `database/schema.sql`
+2. Clonar proyecto: git clone <repo-url>
+3. Crear .env: copy .env.example .env
+4. Editar .env: configurar DB_PASSWORD y JWT_SECRET_KEY
+5. Instalar: mvn clean install
+6. Ejecutar: mvn spring-boot:run
+7. Backend corriendo en: http://localhost:8080
+8. Desarrollar frontend Angular en proyecto separado (puerto 4200)
+
+Estado del Backend: ✅ LISTO PARA DESARROLLO ANGULAR
+Schema Status: ✅ VALIDADO Y FUNCIONAL (ddl-auto=validate)
+
+## 🗄️ CONFIGURACIÓN DE BASE DE DATOS
+
+### ⚠️ IMPORTANTE: Base de Datos Manual
+
+**El proyecto NO crea las tablas automáticamente**. Debes ejecutar el script SQL manualmente.
+
+### Pasos para Crear la Base de Datos:
+
+1. **Accede a MySQL:**
+   ```bash
+   mysql -u root -p
+   ```
+
+2. **Ejecuta el script de base de datos:**
+   ```sql
+   source C:/D/AGOSTO 2025/Desarrollo web Integrado/cafeteria/database/schema.sql
+   ```
+   
+   O desde línea de comandos:
+   ```bash
+   mysql -u root -p < database/schema.sql
+   ```
+
+3. **Verifica que se creó correctamente:**
+   ```sql
+   USE sistema_pos;
+   SHOW TABLES;
+   ```
+
+### Lo que Incluye el Script SQL:
+
+✅ **Tablas completas** con todas las columnas y tipos de datos
+✅ **Relaciones (Foreign Keys)** entre todas las tablas
+✅ **Índices optimizados** para búsquedas rápidas:
+   - Índices simples en campos frecuentemente consultados
+   - Índices compuestos para consultas complejas
+   - Índices FULLTEXT para búsqueda de texto
+   
+✅ **Triggers automáticos**:
+   - **Auto-crear Cliente**: Cuando se crea un Usuario con rol CLIENTE, automáticamente se crea su registro en tabla `cliente`
+   - **Actualizar Stock**: Reduce inventario automáticamente al completar un pedido
+   - **Calcular Totales**: Calcula el total del pedido automáticamente
+   - **Validar Stock**: Valida que haya stock suficiente antes de crear pedido
+   - **Auditoría**: Registra cambios importantes
+   
+✅ **Vistas útiles**:
+   - `v_productos_stock_bajo`: Productos que necesitan reabastecimiento
+   - `v_ventas_por_dia`: Estadísticas diarias de ventas
+   - `v_productos_mas_vendidos`: Top productos vendidos
+   
+✅ **Procedimientos almacenados**:
+   - `sp_reporte_ventas`: Genera reporte de ventas por rango de fechas
+   - `sp_inventario_critico`: Lista productos con stock crítico
+   
+✅ **Eventos programados**:
+   - Limpia tokens JWT expirados diariamente
+   - Actualiza estado de promociones vencidas cada hora
+   
+✅ **Datos iniciales (Roles y Permisos)**:
+   - Roles: ADMIN, EMPLEADO, CLIENTE
+   - Permisos básicos para cada módulo
+   - Asociación roles-permisos predefinida
+
+### Configuración de spring.jpa.hibernate.ddl-auto:
+
+El proyecto está configurado con `ddl-auto=validate`:
+- ✅ Spring Boot **valida** que las tablas existan
+- ✅ Spring Boot **NO crea** ni **modifica** tablas
+- ✅ Si hay diferencias con las entidades Java, la aplicación **falla** al inicio (esto es bueno para detectar errores)
+- ✅ El esquema se mantiene **estable** y **controlado** vía SQL
+
+### ⚙️ Configuración de Seguridad (OPCIONAL - Recomendado en Producción)
+
+**Para DESARROLLO:** Puedes usar el usuario `root` directamente.
+
+**Para PRODUCCIÓN:** Ejecuta el script de seguridad:
+```bash
+mysql -u root -p < database/security_config.sql
+```
+
+**Lo que hace security_config.sql:**
+✅ Crea usuario `cafeteria_app` con privilegios mínimos
+✅ Solo permisos SELECT, INSERT, UPDATE, DELETE, EXECUTE
+✅ Bloquea DROP, ALTER, CREATE (mayor seguridad)
+✅ Configura timeouts y variables de rendimiento
+✅ Habilita logs de consultas lentas
+✅ Crea usuario para backups
+
+**Actualizar .env para usar usuario seguro:**
+```properties
+DB_USERNAME=cafeteria_app
+DB_PASSWORD=CafeteriaApp_2025!
+```
+
+⚠️ **IMPORTANTE:** Cambiar la contraseña en `security_config.sql` antes de ejecutar en producción
+
+**Ver:** `database/README.md` para instrucciones detalladas
+
+## ⚠️ SEGURIDAD CRÍTICA - LEER PRIMERO
+
+### 1. CONFIGURACIÓN INICIAL DEL PROYECTO
+
+**IMPORTANTE**: El archivo .env NO está incluido en el repositorio por seguridad.
+
+PASOS OBLIGATORIOS ANTES DE INICIAR:
+
+1. Copia el archivo .env.example a .env:
+   Windows: copy .env.example .env
+   Linux/Mac: cp .env.example .env
+
+2. Genera una clave JWT SEGURA (ejecuta UNO de estos):
+   
+   # PowerShell (Windows):
+   [Convert]::ToBase64String((1..32|%{Get-Random -Max 256}))
+   
+   # OpenSSL (Linux/Mac/Git Bash):
+   openssl rand -base64 32
+   
+   # Node.js (cualquier plataforma):
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+3. Edita el archivo .env y actualiza OBLIGATORIAMENTE:
+   
+   DB_PASSWORD=TU_PASSWORD_MYSQL_REAL
+   JWT_SECRET_KEY=LA_CLAVE_GENERADA_EN_EL_PASO_2
+   
+   Ejemplo:
+   DB_PASSWORD=DataBase_1.
+   JWT_SECRET_KEY=WgBl1a4xhMCmurt65MB+Lg26u3OQt+n4tAI9ahDTs=
+
+4. Valores opcionales que puedes ajustar en .env:
+   - DB_HOST, DB_PORT, DB_NAME (si MySQL está en otro servidor)
+   - FILE_UPLOAD_DIR (ruta donde se guardan imágenes)
+   - REPORTS_COMPANY_NAME, REPORTS_COMPANY_ADDRESS, etc.
+   - CORS_ALLOWED_ORIGINS (URL de tu frontend Angular)
+
+5. Descargar dependencias e instalar:
+   mvn clean install
+
+6. Ejecutar la aplicación:
+   mvn spring-boot:run
+   
+   O usar el IDE run/debug
+
+### 2. GITIGNORE - PROTECCIÓN AUTOMÁTICA
+
+El archivo .gitignore YA está configurado y protege:
+- ✅ .env (NUNCA se subirá a Git - cada desarrollador crea el suyo)
+- ✅ uploads/ (archivos subidos por usuarios)
+- ✅ temp/ y logs/ (archivos temporales)
+- ✅ target/ (archivos compilados)
+
+VERIFICACIÓN antes de cada commit:
+git status
+# El archivo .env NO debe aparecer en la lista
+# Si aparece, el .gitignore tiene un error
+
+### 3. ARQUITECTURA DEL SISTEMA
+
+Spring Boot Backend (Puerto 8080):
+- API REST pura (JSON)
+- Autenticación JWT
+- Sin vistas HTML (solo endpoints)
+
+Angular Frontend (Puerto 4200 - proyecto separado):
+- Consumirá la API REST
+- Interfaz de usuario completa
+- Comunicación vía HTTP + JWT
+
+### 4. DEPENDENCIAS CLAVE
+
+spring-dotenv (v4.0.0):
+- Carga automáticamente el archivo .env
+- No requiere configuración adicional
+- Variables disponibles como ${VAR_NAME} en application.properties
+
+spring-boot-starter-security + JWT:
+- Autenticación basada en tokens
+- Sin sesiones (stateless)
+- Tokens válidos por 24 horas
+
+iText7 (v7.2.5):
+- Generación de PDFs (boletas, reportes)
+
+Apache POI (v5.2.3):
+- Generación y lectura de Excel
+- Importación/exportación masiva
+
+### 5. CHECKLIST DE SEGURIDAD PRE-PRODUCCIÓN
+
+Antes de desplegar a producción:
+☐ Generar nueva JWT_SECRET_KEY única (NUNCA usar la de desarrollo)
+☐ Usar contraseñas fuertes de base de datos
+☐ Habilitar HTTPS/SSL (certificado válido)
+☐ Configurar CORS solo para dominios autorizados de producción
+☐ Cambiar credenciales de usuarios por defecto (admin@cafeteria.com)
+☐ Implementar rate limiting para prevenir ataques
+☐ Verificar que .env NO existe en el repositorio: git ls-files | grep .env
+☐ Configurar backups automáticos de base de datos
+☐ Habilitar logging de auditoría en producción
+☐ Validar todos los inputs (ya implementado en backend)
+☐ Usar variables de entorno del sistema operativo en lugar de .env
+☐ Revisar y actualizar dependencias a últimas versiones seguras
+☐ Configurar firewall para MySQL (solo acceso desde backend)
+☐ Deshabilitar spring.jpa.show-sql=true en producción
+
+## CONFIGURACIÓN BASE
+Base URL: http://localhost:8080
+Content-Type: application/json
+Authorization: Bearer {JWT_TOKEN}
+
+## AUTENTICACIÓN JWT
+
+### 1. Login (POST /auth/login)
+Endpoint: POST /auth/login
+Autenticación: No requerida (público)
+Content-Type: application/json
+
+Request Body:
+{
+  "correo": "admin@cafeteria.com",
+  "contrasena": "admin123"
+}
+
+Response Success (200):
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+Response Error (401):
+{
+  "message": "Credenciales inválidas"
+}
+
+### 2. Registro (POST /auth/register)
+Endpoint: POST /auth/register
+Autenticación: No requerida (público)
+Content-Type: application/json
+
+Request Body:
+{
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "correo": "juan@example.com",
+  "contrasena": "password123",
+  "idRol": 3
+}
+
+Response Success (200):
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+NOTA: idRol valores:
+- 1 = ADMIN
+- 2 = EMPLEADO
+- 3 = CLIENTE
+
+## ========================================
+## GESTIÓN DE CATEGORÍAS
+## ========================================
+
+### 1. Listar Categorías (GET /categorias)
+Endpoint: GET /categorias
+Autenticación: Requerida (Bearer Token)
+Roles: Todos
+
+Response Success (200):
+[
+  {
+    "idCategoria": 1,
+    "nombre": "Bebidas Calientes",
+    "descripcion": "Café, té, chocolate"
+  },
+  {
+    "idCategoria": 2,
+    "nombre": "Bebidas Frías",
+    "descripcion": "Jugos, smoothies, frappes"
+  }
+]
+
+### 2. Obtener Categoría por ID (GET /categorias/{id})
+Endpoint: GET /categorias/{id}
+Autenticación: Requerida
+Roles: Todos
+
+Response Success (200):
+{
+  "idCategoria": 1,
+  "nombre": "Bebidas Calientes",
+  "descripcion": "Café, té, chocolate"
+}
+
+### 3. Crear Categoría (POST /categorias)
+Endpoint: POST /categorias
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Request Body:
+{
+  "nombre": "Postres",
+  "descripcion": "Pasteles y galletas"
+}
+
+Response Success (201):
+{
+  "idCategoria": 5,
+  "nombre": "Postres",
+  "descripcion": "Pasteles y galletas"
+}
+
+### 4. Actualizar Categoría (PUT /categorias/{id})
+Endpoint: PUT /categorias/{id}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Request Body:
+{
+  "nombre": "Postres Especiales",
+  "descripcion": "Pasteles gourmet"
+}
+
+### 5. Eliminar Categoría (DELETE /categorias/{id})
+Endpoint: DELETE /categorias/{id}
+Autenticación: Requerida
+Roles: ADMIN
+
+Response Success (204): No Content
+
+## ========================================
+## GESTIÓN DE PRODUCTOS
+## ========================================
+
+### 1. Listar Todos los Productos (GET /productos)
+Endpoint: GET /productos
+Autenticación: Requerida
+Roles: Todos
+
+Response Success (200):
+[
+  {
+    "idProducto": 1,
+    "nombre": "Café Americano",
+    "descripcion": "Café negro 8oz",
+    "precio": 5.50,
+    "impuesto": 0.18,
+    "imagenUrl": "cafe-americano.jpg",
+    "estado": "ACTIVO",
+    "idCategoria": 1,
+    "nombreCategoria": "Bebidas Calientes",
+    "cantidadActual": 100,
+    "stockMinimo": 10,
+    "unidadMedida": "unidad"
+  }
+]
+
+Estados válidos: ACTIVO, INACTIVO
+
+### 2. Buscar Producto por ID (GET /productos/{id})
+Endpoint: GET /productos/{id}
+Autenticación: Requerida
+Roles: Todos
+
+Response Success (200):
+{
+  "idProducto": 1,
+  "nombre": "Café Americano",
+  "descripcion": "Café negro 8oz",
+  "precio": 5.50,
+  "impuesto": 0.18,
+  "imagenUrl": "cafe-americano.jpg",
+  "estado": "ACTIVO",
+  "idCategoria": 1,
+  "nombreCategoria": "Bebidas Calientes",
+  "cantidadActual": 100,
+  "stockMinimo": 10,
+  "unidadMedida": "unidad"
+}
+
+### 3. Listar Productos por Categoría (GET /productos/categoria/{idCategoria})
+Endpoint: GET /productos/categoria/{idCategoria}
+Autenticación: Requerida
+Roles: Todos
+
+### 4. Listar Productos Disponibles (GET /productos/disponibles)
+Endpoint: GET /productos/disponibles
+Autenticación: Requerida
+Roles: Todos
+
+### 5. Crear Producto (POST /productos)
+Endpoint: POST /productos
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Request Body:
+{
+  "nombre": "Cappuccino",
+  "descripcion": "Café con leche espumosa",
+  "precio": 7.50,
+  "impuesto": 0.18,
+  "imagenUrl": "cappuccino.jpg",
+  "estado": "ACTIVO",
+  "idCategoria": 1,
+  "cantidadActual": 50,
+  "stockMinimo": 10,
+  "unidadMedida": "unidad"
+}
+
+Response Success (201):
+{
+  "idProducto": 10,
+  "nombre": "Cappuccino",
+  ...
+}
+
+### 6. Actualizar Producto (PUT /productos/{id})
+Endpoint: PUT /productos/{id}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Request Body: (mismo que crear)
+
+### 7. Eliminar Producto (DELETE /productos/{id})
+Endpoint: DELETE /productos/{id}
+Autenticación: Requerida
+Roles: ADMIN
+
+## ========================================
+## GESTIÓN DE USUARIOS
+## ========================================
+
+### 1. Listar Usuarios (GET /usuarios)
+Endpoint: GET /usuarios
+Autenticación: Requerida
+Roles: ADMIN
+
+Response Success (200):
+[
+  {
+    "idUsuario": 1,
+    "nombre": "Admin",
+    "apellido": "Sistema",
+    "correo": "admin@cafeteria.com",
+    "estado": "ACTIVO",
+    "fechaCreacion": "2025-01-15T10:30:00",
+    "idRol": 1,
+    "nombreRol": "ADMIN",
+    "telefono": "987654321",
+    "direccion": "Av. Principal 123"
+  }
+]
+
+### 2. Buscar Usuario por ID (GET /usuarios/{id})
+Endpoint: GET /usuarios/{id}
+Autenticación: Requerida
+Roles: ADMIN o el mismo usuario
+
+### 3. Buscar Usuario por Email (GET /usuarios/email/{correo})
+Endpoint: GET /usuarios/email/{correo}
+Autenticación: Requerida
+Roles: ADMIN o el mismo usuario
+
+### 4. Crear Usuario (POST /usuarios)
+Endpoint: POST /usuarios
+Autenticación: Requerida
+Roles: ADMIN
+
+Request Body:
+{
+  "nombre": "María",
+  "apellido": "González",
+  "correo": "maria@example.com",
+  "contrasena": "pass123",
+  "idRol": 2,
+  "telefono": "987654321",
+  "direccion": "Calle 123"
+}
+
+### 5. Actualizar Usuario (PUT /usuarios/{id})
+Endpoint: PUT /usuarios/{id}
+Autenticación: Requerida
+Roles: ADMIN o el mismo usuario
+
+### 6. Eliminar Usuario (DELETE /usuarios/{id})
+Endpoint: DELETE /usuarios/{id}
+Autenticación: Requerida
+Roles: ADMIN
+
+## ========================================
+## GESTIÓN DE PEDIDOS
+## ========================================
+
+### 1. Listar Todos los Pedidos (GET /pedidos)
+Endpoint: GET /pedidos
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Response Success (200):
+[
+  {
+    "idPedido": 1,
+    "fecha": "2025-11-26T14:30:00",
+    "estado": "ENTREGADO",
+    "tipoEntrega": "LOCAL",
+    "total": 25.50,
+    "idUsuario": 3,
+    "nombreCliente": "Juan Pérez",
+    "atendidoPor": 2,
+    "nombreEmpleado": "María López",
+    "detalles": [
+      {
+        "idDetalle": 1,
+        "idProducto": 1,
+        "nombreProducto": "Café Americano",
+        "cantidad": 2,
+        "precioUnitario": 5.50,
+        "subtotal": 11.00
+      },
+      {
+        "idDetalle": 2,
+        "idProducto": 5,
+        "nombreProducto": "Croissant",
+        "cantidad": 3,
+        "precioUnitario": 4.50,
+        "subtotal": 13.50
+      }
+    ]
+  }
+]
+
+### 2. Listar Pedidos por Usuario (GET /pedidos/usuario/{idUsuario})
+Endpoint: GET /pedidos/usuario/{idUsuario}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO o el mismo usuario
+
+### 3. Listar Pedidos por Estado (GET /pedidos/estado/{estado})
+Endpoint: GET /pedidos/estado/{estado}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Estados válidos: PENDIENTE, PREPARACION, LISTO, ENTREGADO, CANCELADO
+Tipo de entrega: DELIVERY, RETIRO, LOCAL
+
+### 4. Buscar Pedido por ID (GET /pedidos/{id})
+Endpoint: GET /pedidos/{id}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO o propietario del pedido
+
+### 5. Crear Pedido (POST /pedidos)
+Endpoint: POST /pedidos
+Autenticación: Requerida
+Roles: Todos
+
+Request Body:
+{
+  "idUsuario": 3,
+  "tipoEntrega": "DELIVERY",
+  "detalles": [
+    {
+      "idProducto": 1,
+      "cantidad": 2
+    },
+    {
+      "idProducto": 5,
+      "cantidad": 1
+    }
+  ]
+}
+
+Response Success (201):
+{
+  "idPedido": 15,
+  "fecha": "2025-11-26T19:00:00",
+  "estado": "PENDIENTE",
+  "tipoEntrega": "DELIVERY",
+  "total": 15.50,
+  ...
+}
+
+### 6. Cambiar Estado de Pedido (PUT /pedidos/{id}/estado)
+Endpoint: PUT /pedidos/{id}/estado
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Request Body:
+{
+  "estado": "PREPARACION"
+}
+
+Estados válidos: PENDIENTE, PREPARACION, LISTO, ENTREGADO, CANCELADO
+
+## ========================================
+## GESTIÓN DE INVENTARIO
+## ========================================
+
+### 1. Listar Todo el Inventario (GET /inventario)
+Endpoint: GET /inventario
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Response Success (200):
+[
+  {
+    "idInventario": 1,
+    "producto": {
+      "idProducto": 1,
+      "nombre": "Café Americano"
+    },
+    "cantidadActual": 100,
+    "stockMinimo": 10,
+    "unidadMedida": "unidad",
+    "fechaActualizacion": "2025-11-26T10:00:00"
+  }
+]
+
+### 2. Buscar Inventario por Producto (GET /inventario/producto/{idProducto})
+Endpoint: GET /inventario/producto/{idProducto}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+### 3. Listar Productos con Stock Bajo (GET /inventario/bajo-stock)
+Endpoint: GET /inventario/bajo-stock
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+### 4. Actualizar Stock (PUT /inventario/{id})
+Endpoint: PUT /inventario/{id}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Request Body:
+{
+  "cantidadActual": 150,
+  "stockMinimo": 15
+}
+
+## ========================================
+## GESTIÓN DE PROMOCIONES
+## ========================================
+
+### 1. Listar Promociones (GET /promociones)
+Endpoint: GET /promociones
+Autenticación: Requerida
+Roles: Todos
+
+Response Success (200):
+[
+  {
+    "idPromocion": 1,
+    "nombre": "Happy Hour Café",
+    "descripcion": "2x1 en cafés de 3pm a 5pm",
+    "tipo": "DOS_POR_UNO",
+    "fechaInicio": "2025-11-01",
+    "fechaFin": "2025-11-30",
+    "estado": "ACTIVA"
+  },
+  {
+    "idPromocion": 2,
+    "nombre": "Combo Desayuno",
+    "descripcion": "Café + croissant por S/10",
+    "tipo": "COMBO",
+    "fechaInicio": "2025-12-01",
+    "fechaFin": "2025-12-31",
+    "estado": "ACTIVA"
+  }
+]
+
+### 2. Listar Promociones Activas (GET /promociones/activas)
+Endpoint: GET /promociones/activas
+Autenticación: Requerida
+Roles: Todos
+
+### 3. Crear Promoción (POST /promociones)
+Endpoint: POST /promociones
+Autenticación: Requerida
+Roles: ADMIN
+
+Request Body:
+{
+  "nombre": "Descuento Especial",
+  "descripcion": "Descuento en productos seleccionados",
+  "tipo": "DESCUENTO",
+  "fechaInicio": "2025-12-01",
+  "fechaFin": "2025-12-31"
+}
+
+Tipos válidos: DESCUENTO, COMBO, DOS_POR_UNO
+Fechas en formato: YYYY-MM-DD
+
+### 4. Actualizar Promoción (PUT /promociones/{id})
+Endpoint: PUT /promociones/{id}
+Autenticación: Requerida
+Roles: ADMIN
+
+### 5. Eliminar Promoción (DELETE /promociones/{id})
+Endpoint: DELETE /promociones/{id}
+Autenticación: Requerida
+Roles: ADMIN
+
+## ========================================
+## GESTIÓN DE ARCHIVOS
+## ========================================
+
+### 1. Subir Archivo (POST /files/upload)
+Endpoint: POST /files/upload
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+Content-Type: multipart/form-data
+
+Request Body (FormData):
+file: <archivo binario>
+
+Response Success (200):
+{
+  "filename": "a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg",
+  "message": "Archivo subido exitosamente"
+}
+
+Tipos permitidos: image/jpeg, image/png, image/jpg, image/gif
+Tamaño máximo: 10MB
+
+### 2. Descargar Archivo (GET /files/download/{filename})
+Endpoint: GET /files/download/{filename}
+Autenticación: No requerida (público)
+
+Response Success (200):
+Content-Type: application/octet-stream
+Body: <archivo binario>
+
+### 3. Eliminar Archivo (DELETE /files/{filename})
+Endpoint: DELETE /files/{filename}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Response Success (200):
+{
+  "message": "Archivo eliminado exitosamente"
+}
+
+## ========================================
+## REPORTES
+## ========================================
+
+### 1. Generar Boleta PDF (GET /reportes/boleta/{pedidoId})
+Endpoint: GET /reportes/boleta/{pedidoId}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Response Success (200):
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="boleta_15.pdf"
+Body: <PDF binario>
+
+### 2. Generar Ticket ASCII (GET /reportes/ticket/{pedidoId})
+Endpoint: GET /reportes/ticket/{pedidoId}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Response Success (200):
+Content-Type: text/plain
+Content-Disposition: attachment; filename="ticket_15.txt"
+Body: <Texto ASCII>
+
+### 3. Reporte de Pedidos (GET /reportes/pedidos)
+Endpoint: GET /reportes/pedidos?fechaInicio={ISO}&fechaFin={ISO}&estado={ESTADO}&idUsuario={ID}&formato={PDF|EXCEL}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+Query Parameters (todos opcionales):
+- fechaInicio: 2025-01-01T00:00:00
+- fechaFin: 2025-12-31T23:59:59
+- estado: PENDIENTE|PREPARACION|LISTO|ENTREGADO|CANCELADO
+- idUsuario: 3
+- formato: PDF o EXCEL (default: PDF)
+
+Response Success (200):
+Content-Type: application/pdf o application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+Content-Disposition: attachment; filename="reporte_pedidos.pdf"
+
+### 4. Reporte de Productos (GET /reportes/productos)
+Endpoint: GET /reportes/productos?idCategoria={ID}&formato={PDF|EXCEL}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+### 5. Reporte de Usuarios (GET /reportes/usuarios)
+Endpoint: GET /reportes/usuarios?formato={PDF|EXCEL}
+Autenticación: Requerida
+Roles: ADMIN
+
+### 6. Reporte de Inventario (GET /reportes/inventario)
+Endpoint: GET /reportes/inventario?formato={PDF|EXCEL}
+Autenticación: Requerida
+Roles: ADMIN, EMPLEADO
+
+## ========================================
+## OPERACIONES MASIVAS (BULK)
+## ========================================
+
+### 1. Importar Usuarios desde Excel (POST /bulk/usuarios/import)
+Endpoint: POST /bulk/usuarios/import
+Autenticación: Requerida
+Roles: ADMIN
+Content-Type: multipart/form-data
+
+Request Body (FormData):
+file: <archivo .xlsx>
+
+Response Success (200):
+{
+  "success": 45,
+  "errors": 2,
+  "errorDetails": [
+    "Fila 10: Email duplicado",
+    "Fila 25: Rol inválido"
+  ],
+  "message": "Importados: 45, Errores: 2"
+}
+
+### 2. Importar Productos desde Excel (POST /bulk/productos/import)
+Endpoint: POST /bulk/productos/import
+Autenticación: Requerida
+Roles: ADMIN
+Content-Type: multipart/form-data
+
+Request Body (FormData):
+file: <archivo .xlsx>
+
+Response Success (200):
+{
+  "success": 120,
+  "errors": 0,
+  "errorDetails": [],
+  "message": "Importados: 120, Errores: 0"
+}
+
+### 3. Descargar Plantilla de Usuarios (GET /bulk/template/usuarios)
+Endpoint: GET /bulk/template/usuarios
+Autenticación: Requerida
+Roles: ADMIN
+
+Response Success (200):
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+Content-Disposition: attachment; filename="plantilla_usuarios.xlsx"
+
+### 4. Descargar Plantilla de Productos (GET /bulk/template/productos)
+Endpoint: GET /bulk/template/productos
+Autenticación: Requerida
+Roles: ADMIN
+
+## ========================================
+## DASHBOARD ADMINISTRATIVO
+## ========================================
+
+### 1. Obtener Estadísticas del Dashboard (GET /admin/dashboard)
+Endpoint: GET /admin/dashboard
+Autenticación: Requerida
+Roles: ADMIN
+
+Response Success (200):
+{
+  "totalUsuarios": 45,
+  "totalProductos": 120,
+  "totalPedidos": 350,
+  "ventasHoy": 1500.50,
+  "ventasMes": 45000.00,
+  "pedidosPendientes": 8
+}
+
+## ========================================
+## CONFIGURACIÓN CORS PARA ANGULAR
+## ========================================
+
+El backend debe configurar CORS para permitir requests desde Angular.
+
+Configuración necesaria en SecurityConfig.java:
+
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowCredentials(true);
+    
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+}
+
+## ========================================
+## MANEJO DE ERRORES
+## ========================================
+
+Respuestas de error estándar:
+
+400 Bad Request:
+{
+  "message": "Datos inválidos",
+  "errors": ["El campo nombre es requerido"]
+}
+
+401 Unauthorized:
+{
+  "message": "No autorizado",
+  "error": "Token JWT inválido o expirado"
+}
+
+403 Forbidden:
+{
+  "message": "Acceso denegado",
+  "error": "No tienes permisos para esta operación"
+}
+
+404 Not Found:
+{
+  "message": "Recurso no encontrado",
+  "error": "El producto con ID 999 no existe"
+}
+
+500 Internal Server Error:
+{
+  "message": "Error interno del servidor",
+  "error": "Detalles del error..."
+}
+
+## ========================================
+## FLUJO DE AUTENTICACIÓN EN ANGULAR
+## ========================================
+
+1. Usuario hace login en /auth/login
+2. Backend retorna JWT token
+3. Angular guarda el token en localStorage o sessionStorage
+4. Para cada request subsecuente, Angular incluye el header:
+   Authorization: Bearer {token}
+5. Backend valida el token en cada request
+6. Si el token expira (24 horas), usuario debe hacer login nuevamente
+
+Ejemplo en Angular:
+
+// auth.service.ts
+login(correo: string, contrasena: string) {
+  return this.http.post<{token: string}>('http://localhost:8080/auth/login', {
+    correo,
+    contrasena
+  }).pipe(
+    tap(response => {
+      localStorage.setItem('token', response.token);
+    })
+  );
+}
+
+// http.interceptor.ts
+intercept(request: HttpRequest<any>, next: HttpHandler) {
+  const token = localStorage.getItem('token');
+  if (token) {
+    request = request.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+  return next.handle(request);
+}
+
+## ========================================
+## VARIABLES DE ENTORNO PARA ANGULAR
+## ========================================
+
+environment.ts (desarrollo):
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080',
+  fileUploadMaxSize: 10485760, // 10MB
+  allowedImageTypes: ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'],
+  jwtTokenKey: 'cafeteria_jwt_token'
+};
+
+environment.prod.ts (producción):
+export const environment = {
+  production: true,
+  apiUrl: 'https://api.cafeteria.com',
+  fileUploadMaxSize: 10485760,
+  allowedImageTypes: ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'],
+  jwtTokenKey: 'cafeteria_jwt_token'
+};
+
+## ========================================
+## MODELOS/INTERFACES TYPESCRIPT PARA ANGULAR
+## ========================================
+
+// models/usuario.model.ts
+export interface Usuario {
+  idUsuario?: number;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  contrasena?: string;
+  estado?: 'ACTIVO' | 'INACTIVO';
+  fechaCreacion?: Date;
+  idRol: number;
+  nombreRol?: string;
+  telefono?: string;
+  direccion?: string;
+}
+
+// models/producto.model.ts
+export interface Producto {
+  idProducto?: number;
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  imagenUrl?: string;
+  estado?: 'DISPONIBLE' | 'AGOTADO' | 'DESCONTINUADO';
+  idCategoria: number;
+  nombreCategoria?: string;
+  cantidadActual?: number;
+  stockMinimo?: number;
+  unidadMedida?: string;
+}
+
+// models/pedido.model.ts
+export interface Pedido {
+  idPedido?: number;
+  fecha?: Date;
+  estado?: 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADO' | 'CANCELADO';
+  tipoEntrega: 'LOCAL' | 'DOMICILIO';
+  total?: number;
+  idUsuario: number;
+  nombreCliente?: string;
+  idEmpleado?: number;
+  nombreEmpleado?: string;
+  detalles: DetallePedido[];
+}
+
+export interface DetallePedido {
+  idDetallePedido?: number;
+  idProducto: number;
+  nombreProducto?: string;
+  cantidad: number;
+  precioUnitario?: number;
+  subtotal?: number;
+}
+
+// models/categoria.model.ts
+export interface Categoria {
+  idCategoria?: number;
+  nombre: string;
+  descripcion?: string;
+}
+
+// models/promocion.model.ts
+export interface Promocion {
+  idPromocion?: number;
+  nombre: string;
+  descripcion?: string;
+  porcentajeDescuento: number;
+  fechaInicio: Date;
+  fechaFin: Date;
+  imagenUrl?: string;
+  estado?: 'ACTIVA' | 'INACTIVA';
+}
+
+// models/auth.model.ts
+export interface LoginRequest {
+  correo: string;
+  contrasena: string;
+}
+
+export interface RegisterRequest {
+  nombre: string;
+  apellido: string;
+  correo: string;
+  contrasena: string;
+  idRol: number;
+}
+
+export interface AuthResponse {
+  token: string;
+}
+
+## ========================================
+## ESTRUCTURA DE CARPETAS RECOMENDADA PARA ANGULAR
+## ========================================
+
+src/
+├── app/
+│   ├── core/                    # Servicios singleton, guards, interceptors
+│   │   ├── guards/
+│   │   │   ├── auth.guard.ts
+│   │   │   └── role.guard.ts
+│   │   ├── interceptors/
+│   │   │   ├── jwt.interceptor.ts
+│   │   │   └── error.interceptor.ts
+│   │   └── services/
+│   │       ├── auth.service.ts
+│   │       └── storage.service.ts
+│   ├── shared/                  # Componentes, directivas, pipes compartidos
+│   │   ├── components/
+│   │   ├── directives/
+│   │   └── pipes/
+│   ├── models/                  # Interfaces y modelos
+│   │   ├── usuario.model.ts
+│   │   ├── producto.model.ts
+│   │   ├── pedido.model.ts
+│   │   └── ...
+│   ├── services/               # Servicios de features
+│   │   ├── producto.service.ts
+│   │   ├── pedido.service.ts
+│   │   ├── usuario.service.ts
+│   │   ├── categoria.service.ts
+│   │   ├── promocion.service.ts
+│   │   ├── inventario.service.ts
+│   │   ├── reporte.service.ts
+│   │   └── file.service.ts
+│   ├── pages/                  # Páginas/Vistas principales
+│   │   ├── auth/
+│   │   │   ├── login/
+│   │   │   └── register/
+│   │   ├── dashboard/
+│   │   ├── productos/
+│   │   ├── pedidos/
+│   │   ├── usuarios/
+│   │   ├── inventario/
+│   │   ├── promociones/
+│   │   └── reportes/
+│   └── app.component.ts
+├── assets/
+│   ├── images/
+│   └── icons/
+└── environments/
+    ├── environment.ts
+    └── environment.prod.ts
+
+## ========================================
+## CONSIDERACIONES DE SEGURIDAD
+## ========================================
+
+1. NUNCA almacenar contraseñas en texto plano
+2. Validar SIEMPRE los datos del lado del servidor (el backend ya lo hace)
+3. Usar HTTPS en producción
+4. Implementar rate limiting para prevenir ataques de fuerza bruta
+5. Validar el token JWT en cada request
+6. Sanitizar inputs para prevenir XSS
+7. Implementar CORS correctamente
+8. No exponer información sensible en mensajes de error
+
+## ========================================
+## PRÓXIMOS PASOS RECOMENDADOS
+## ========================================
+
+1. Configurar proyecto Angular con Angular CLI
+2. Instalar dependencias necesarias (HttpClient, Forms, Router)
+3. Crear servicios para cada entidad
+4. Implementar guards para proteger rutas
+5. Crear interceptors para JWT y manejo de errores
+6. Desarrollar componentes de UI
+7. Implementar formularios reactivos
+8. Agregar validaciones del lado del cliente
+9. Crear módulo de reportes con descarga de archivos
+10. Implementar paginación y búsqueda en tablas
+11. Agregar notificaciones Toast/Snackbar
+12. Optimizar con lazy loading de módulos
+13. Implementar PWA para uso offline (opcional)
+14. Agregar pruebas unitarias y E2E
+
+## ========================================
+## COMANDOS ÚTILES PARA DESARROLLO
+## ========================================
+
+# Iniciar backend Spring Boot
+cd cafeteria
+mvn spring-boot:run
+
+# Crear proyecto Angular
+ng new cafeteria-frontend
+cd cafeteria-frontend
+ng serve
+
+# Generar servicios
+ng generate service services/producto
+ng generate service services/pedido
+ng generate service services/auth
+
+# Generar componentes
+ng generate component pages/productos
+ng generate component pages/pedidos
+
+# Generar guards
+ng generate guard core/guards/auth
+
+# Build para producción
+ng build --prod
+
+## ========================================
+## CONTACTO Y SOPORTE
+## ========================================
+
+Backend API: http://localhost:8080
+Swagger/API Docs: (pendiente de implementar)
+Database: MySQL en localhost:3306/sistema_pos
+
+Credenciales de prueba:
+Admin:
+  Email: admin@cafeteria.com
+  Password: admin123
+
+Empleado:
+  Email: empleado@cafeteria.com
+  Password: empleado123
+
+Cliente:
+  Email: cliente@cafeteria.com
+  Password: cliente123
+
+## FIN DE LA DOCUMENTACIÓN

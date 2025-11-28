@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Cafetería El Aroma</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+        .sidebar .btn-link {
+            color: #ecf0f1;
+            padding: 15px 20px;
+            text-align: left;
+            border-left: 3px solid transparent;
+        }
+        .sidebar .btn-link:hover {
+            background: rgba(231, 76, 60, 0.2);
+            border-left-color: #e74c3c;
+            padding-left: 25px;
+        }
+        .stat-card {
+            border-left: 4px solid;
+            transition: all 0.3s;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        .badge {
+            padding: 0.5em 0.8em;
+            font-weight: 500;
+        }
+        .card-header {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-3 text-white border-bottom border-secondary">
+                    <h4 class="mb-0"><i class="fas fa-coffee me-2"></i>Admin Panel</h4>
+                    <small class="text-muted">Cafetería El Aroma</small>
+                </div>
+                <a th:href="@{/admin/dashboard}" class="active"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+                <a th:href="@{/usuario/lista}"><i class="fas fa-users me-2"></i>Usuarios</a>
+                <a th:href="@{/productos/admin}"><i class="fas fa-coffee me-2"></i>Productos</a>
+                <a th:href="@{/categorias}"><i class="fas fa-tags me-2"></i>Categorías</a>
+                <a th:href="@{/inventario}"><i class="fas fa-boxes me-2"></i>Inventario</a>
+                <a th:href="@{/pedidos}"><i class="fas fa-receipt me-2"></i>Pedidos</a>
+                <a th:href="@{/promociones}"><i class="fas fa-percent me-2"></i>Promociones</a>
+                <a th:href="@{/reportes}"><i class="fas fa-chart-bar me-2"></i>Reportes</a>
+                <hr class="bg-light mx-3">
+                <a th:href="@{/usuario/perfil}"><i class="fas fa-user-cog me-2"></i>Mi Perfil</a>
+                <a th:href="@{/}"></i>Volver a Inicio</a>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-link text-decoration-none w-100">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Dashboard Administrativo</h2>
+                        <p class="text-muted mb-0">Resumen general del sistema</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted d-block">Última actualización</small>
+                        <strong th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></strong>
+                    </div>
+                </div>
+                
+                <!-- Alertas -->
+                <div th:if="${pedidosPendientes > 0}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atención:</strong> Tienes <span th:text="${pedidosPendientes}"></span> pedido(s) pendiente(s) por procesar.
+                    <a th:href="@{/pedidos}" class="alert-link">Ver pedidos</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card border-primary h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Total Usuarios</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${totalUsuarios}">0</h2>
+                                        <small class="text-success"><i class="fas fa-arrow-up"></i> Activos</small>
+                                    </div>
+                                    <div class="text-primary stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a th:href="@{/usuario/lista}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="fas fa-eye me-1"></i> Ver todos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card border-success h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Productos</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${totalProductos}">0</h2>
+                                        <small class="text-success"><i class="fas fa-check-circle"></i> En catálogo</small>
+                                    </div>
+                                    <div class="text-success stat-icon">
+                                        <i class="fas fa-coffee"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a th:href="@{/productos/admin}" class="btn btn-sm btn-outline-success w-100">
+                                    <i class="fas fa-eye me-1"></i> Ver catálogo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card border-warning h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Pedidos Hoy</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${pedidosHoy}">0</h2>
+                                        <small class="text-warning"><i class="fas fa-clock"></i> En proceso</small>
+                                    </div>
+                                    <div class="text-warning stat-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a th:href="@{/pedidos}" class="btn btn-sm btn-outline-warning w-100">
+                                    <i class="fas fa-eye me-1"></i> Ver pedidos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card border-info h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Ventas Hoy</h6>
+                                        <h2 class="mb-0 fw-bold">
+                                            S/ <span th:text="${#numbers.formatDecimal(ventasHoy, 1, 2)}">0.00</span>
+                                        </h2>
+                                        <small class="text-info"><i class="fas fa-dollar-sign"></i> Ingresos</small>
+                                    </div>
+                                    <div class="text-info stat-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a th:href="@{/reportes}" class="btn btn-sm btn-outline-info w-100">
+                                    <i class="fas fa-chart-bar me-1"></i> Ver reportes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Pedidos Recientes</h5>
+                            <a th:href="@{/pedidos}" class="btn btn-sm btn-light">
+                                <i class="fas fa-list me-1"></i> Ver todos
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4">ID</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(pedidosRecientes)}">
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                            No hay pedidos registrados
+                                        </td>
+                                    </tr>
+                                    <tr th:each="pedido : ${pedidosRecientes}">
+                                        <td class="px-4 fw-bold">#<span th:text="${pedido.idPedido}"></span></td>
+                                        <td>
+                                            <i class="fas fa-user-circle me-1 text-muted"></i>
+                                            <span th:text="${pedido.nombreCliente}">Cliente</span>
+                                        </td>
+                                        <td>
+                                            <small th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}"></small>
+                                        </td>
+                                        <td class="fw-bold">
+                                            S/ <span th:text="${#numbers.formatDecimal(pedido.total, 1, 2)}">0.00</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${pedido.estado.name() == 'PENDIENTE'}" class="badge bg-warning text-dark">
+                                                <i class="fas fa-clock me-1"></i>Pendiente
+                                            </span>
+                                            <span th:if="${pedido.estado.name() == 'EN_PREPARACION'}" class="badge bg-info">
+                                                <i class="fas fa-spinner me-1"></i>En Preparación
+                                            </span>
+                                            <span th:if="${pedido.estado.name() == 'LISTO'}" class="badge bg-primary">
+                                                <i class="fas fa-check me-1"></i>Listo
+                                            </span>
+                                            <span th:if="${pedido.estado.name() == 'ENTREGADO'}" class="badge bg-success">
+                                                <i class="fas fa-check-double me-1"></i>Entregado
+                                            </span>
+                                            <span th:if="${pedido.estado.name() == 'CANCELADO'}" class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Cancelado
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{/pedidos/{id}(id=${pedido.idPedido})}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <a th:href="@{/usuario/nuevo}" class="btn btn-outline-primary w-100 py-3">
+                                            <i class="fas fa-user-plus fa-2x d-block mb-2"></i>
+                                            Nuevo Usuario
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a th:href="@{/productos/nuevo}" class="btn btn-outline-success w-100 py-3">
+                                            <i class="fas fa-plus-circle fa-2x d-block mb-2"></i>
+                                            Nuevo Producto
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a th:href="@{/inventario}" class="btn btn-outline-warning w-100 py-3">
+                                            <i class="fas fa-boxes fa-2x d-block mb-2"></i>
+                                            Gestionar Inventario
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a th:href="@{/reportes}" class="btn btn-outline-info w-100 py-3">
+                                            <i class="fas fa-file-download fa-2x d-block mb-2"></i>
+                                            Generar Reporte
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

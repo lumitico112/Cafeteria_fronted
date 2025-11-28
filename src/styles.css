@@ -1,1 +1,93 @@
-/* You can add global styles to this file, and also import other style files */
+/* Importar Bootstrap */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+
+/* Variables globales para el tema de cafetería */
+:root {
+  --coffee-dark: #3e2723; /* Marrón muy oscuro */
+  --coffee-primary: #6d4c41; /* Marrón principal */
+  --coffee-light: #d7ccc8; /* Beige claro */
+  --coffee-accent: #ff6f00; /* Naranja/Dorado */
+
+  /* Colores de estado */
+  --status-pending: #ffc107;
+  --status-prep: #0dcaf0;
+  --status-ready: #0d6efd;
+  --status-delivered: #198754;
+  --status-cancelled: #dc3545;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: var(--coffee-dark);
+}
+
+/* Personalización de botones */
+.btn-primary {
+  background-color: var(--coffee-primary);
+  border-color: var(--coffee-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--coffee-dark);
+  border-color: var(--coffee-dark);
+}
+
+.btn-coffee {
+  background-color: var(--coffee-accent);
+  color: white;
+  border: none;
+}
+
+.btn-coffee:hover {
+  background-color: #e65100;
+  color: white;
+}
+
+/* Layout sidebar */
+.sidebar {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+  color: #ecf0f1;
+  text-decoration: none;
+  padding: 15px 20px;
+  display: block;
+  transition: all 0.3s;
+  border-left: 3px solid transparent;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: rgba(52, 152, 219, 0.2);
+  border-left-color: #3498db;
+  padding-left: 25px;
+}
+
+/* Navbar personalizado */
+.navbar-custom {
+  background-color: var(--coffee-dark);
+}
+
+/* Cards */
+.card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Badges de estado */
+.badge-estado {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}

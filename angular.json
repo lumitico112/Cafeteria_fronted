@@ -28,6 +28,13 @@
             "styles": [
               "src/styles.css"
             ],
+            "polyfills": [
+              "zone.js"
+            ],
+            "scripts": [
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -65,7 +72,8 @@
               "buildTarget": "cafeteria_frontend:build:production"
             },
             "development": {
-              "buildTarget": "cafeteria_frontend:build:development"
+              "buildTarget": "cafeteria_frontend:build:development",
+              "proxyConfig": "proxy.conf.js"
             }
           },
           "defaultConfiguration": "development"

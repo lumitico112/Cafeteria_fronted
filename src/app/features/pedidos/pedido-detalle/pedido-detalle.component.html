@@ -1,0 +1,112 @@
+<div class="container py-4" *ngIf="pedido">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Pedido #{{ pedido.idPedido }}</h2>
+      <span class="badge" 
+            [ngClass]="{
+              'bg-warning text-dark': pedido.estado === 'PENDIENTE',
+              'bg-info text-white': pedido.estado === 'PREPARACION',
+              'bg-primary': pedido.estado === 'LISTO',
+              'bg-success': pedido.estado === 'ENTREGADO',
+              'bg-danger': pedido.estado === 'CANCELADO'
+            }">
+        {{ pedido.estado }}
+      </span>
+    </div>
+    <a routerLink="/pedidos" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 fw-bold">Detalle de Productos</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Producto</th>
+                  <th class="text-center">Cant.</th>
+                  <th class="text-end">Precio Unit.</th>
+                  <th class="text-end pe-4">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let detalle of pedido.detalles">
+                  <td class="ps-4">{{ detalle.nombreProducto }}</td>
+                  <td class="text-center">{{ detalle.cantidad }}</td>
+                  <td class="text-end">S/ {{ detalle.precioUnitario | number:'1.2-2' }}</td>
+                  <td class="text-end pe-4 fw-bold">S/ {{ detalle.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+              <tfoot class="table-light">
+                <tr>
+                  <td colspan="3" class="text-end fw-bold py-3">Total General:</td>
+                  <td class="text-end pe-4 fw-bold py-3 text-primary fs-5">
+                    S/ {{ pedido.total | number:'1.2-2' }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0 fw-bold">Información del Cliente</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <small class="text-muted d-block">Cliente</small>
+            <strong>{{ pedido.nombreCliente }}</strong>
+          </div>
+          <div class="mb-3">
+            <small class="text-muted d-block">Fecha de Pedido</small>
+            <strong>{{ pedido.fecha | date:'medium' }}</strong>
+          </div>
+          <div class="mb-3">
+            <small class="text-muted d-block">Tipo de Entrega</small>
+            <strong>{{ pedido.tipoEntrega }}</strong>
+          </div>
+          <div *ngIf="pedido.nombreEmpleado">
+            <small class="text-muted d-block">Atendido por</small>
+            <strong>{{ pedido.nombreEmpleado }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0" *ngIf="pedido.estado !== 'ENTREGADO' && pedido.estado !== 'CANCELADO'">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Acciones</h5>
+          <div class="d-grid gap-2">
+            <button *ngIf="pedido.estado === 'PENDIENTE'" 
+                    class="btn btn-info text-white" 
+                    (click)="updateEstado('PREPARACION')">
+              <i class="fas fa-fire me-2"></i>Iniciar Preparación
+            </button>
+            <button *ngIf="pedido.estado === 'PREPARACION'" 
+                    class="btn btn-primary" 
+                    (click)="updateEstado('LISTO')">
+              <i class="fas fa-check me-2"></i>Marcar como Listo
+            </button>
+            <button *ngIf="pedido.estado === 'LISTO'" 
+                    class="btn btn-success" 
+                    (click)="updateEstado('ENTREGADO')">
+              <i class="fas fa-box me-2"></i>Entregar Pedido
+            </button>
+            <button class="btn btn-outline-danger" (click)="updateEstado('CANCELADO')">
+              <i class="fas fa-times me-2"></i>Cancelar Pedido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

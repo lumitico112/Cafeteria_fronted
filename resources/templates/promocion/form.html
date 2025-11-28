@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${promocionForm.idPromocion == null ? 'Nueva Promoción' : 'Editar Promoción'}">Promoción</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body class="bg-light">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/admin/dashboard}"><i class="fas fa-coffee me-2"></i>Cafetería - Admin</a>
+      <div class="ms-auto">
+        <a th:href="@{/promociones}" class="btn btn-outline-light btn-sm me-2"><i class="fas fa-arrow-left me-1"></i>Volver</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-tags me-2"></i>
+              <span th:text="${promocionForm.idPromocion == null ? 'Nueva Promoción' : 'Editar Promoción'}"></span>
+            </h5>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/promociones/guardar}" th:object="${promocionForm}" method="post">
+              <input type="hidden" th:field="*{idPromocion}"/>
+              
+              <!-- Incluir CSRF solo si está disponible -->
+              <div th:if="${_csrf != null}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              </div>
+
+              <!-- Nombre -->
+              <div class="mb-3">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input class="form-control" th:field="*{nombre}" placeholder="Ej: Descuento Octubre"
+                       th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"/>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+              </div>
+
+              <!-- Descripción -->
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea class="form-control" th:field="*{descripcion}" rows="3" placeholder="Detalles (opcional)"></textarea>
+              </div>
+
+              <!-- Tipo y Estado -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                  <select class="form-select" th:field="*{tipo}" required>
+                    <option value="">Seleccione tipo</option>
+                    <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}"></option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Estado <span class="text-danger">*</span></label>
+                  <select class="form-select" th:field="*{estado}" required>
+                    <option value="">Seleccione estado</option>
+                    <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Fechas -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Fecha inicio <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" th:field="*{fechaInicio}" required/>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Fecha fin <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" th:field="*{fechaFin}" required/>
+                </div>
+              </div>
+
+              <!-- Productos asociados (multi-select) -->
+              <div class="mb-3">
+                <label class="form-label">Productos</label>
+                <select multiple class="form-select" th:field="*{productoIds}" size="6">
+                  <option th:each="prod : ${productos}"
+                          th:value="${prod.idProducto}"
+                          th:text="${prod.nombre}"
+                          th:selected="${promocionForm.productoIds != null and promocionForm.productoIds.contains(prod.idProducto)}">
+                  </option>
+                </select>
+                <small class="form-text text-muted">Seleccione los productos que pertenecerán a esta promoción.</small>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <a th:href="@{/promociones}" class="btn btn-secondary"><i class="fas fa-times me-1"></i>Cancelar</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Guardar promoción</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { ProductosService } from '../productos.service';
+
+@Component({
+  selector: 'app-producto-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './producto-form.component.html',
+  styleUrls: ['./producto-form.component.css']
+})
+export class ProductoFormComponent implements OnInit {
+  productoForm: FormGroup;
+  isEditing = false;
+  isLoading = false;
+  productId?: number;
+  previewUrl: string | null = null;
+  selectedFile: File | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private productosService: ProductosService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.productoForm = this.fb.group({
+      nombre: ['', Validators.required],
+      descripcion: [''],
+      precio: [0, [Validators.required, Validators.min(0)]],
+      impuesto: [0.18],
+      idCategoria: ['', Validators.required],
+      estado: ['ACTIVO'],
+      cantidadActual: [0],
+      stockMinimo: [10],
+      unidadMedida: ['unidad'],
+      imagenUrl: ['']
+    });
+  }
+
+  ngOnInit() {
+    this.productId = Number(this.route.snapshot.paramMap.get('id'));
+    if (this.productId) {
+      this.isEditing = true;
+      this.loadProduct(this.productId);
+    }
+  }
+
+  loadProduct(id: number) {
+    this.isLoading = true;
+    this.productosService.getById(id).subscribe({
+      next: (producto) => {
+        this.productoForm.patchValue(producto);
+        this.previewUrl = producto.imagenUrl;
+        this.isLoading = false;
+      },
+      error: () => {
+        alert('Error al cargar producto');
+        this.router.navigate(['/productos']);
+      }
+    });
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.productoForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onSubmit() {
+    if (this.productoForm.valid) {
+      this.isLoading = true;
+      
+      // Si hay archivo, subirlo primero
+      if (this.selectedFile) {
+        this.productosService.uploadImage(this.selectedFile).subscribe({
+          next: (response) => {
+            // Asumimos que response.url contiene la URL de la imagen subida
+            // Ajustar según la respuesta real del backend
+            this.productoForm.patchValue({ imagenUrl: response.filename || response.url });
+            this.saveProduct();
+          },
+          error: () => {
+            alert('Error al subir imagen');
+            this.isLoading = false;
+          }
+        });
+      } else {
+        this.saveProduct();
+      }
+    } else {
+      this.productoForm.markAllAsTouched();
+    }
+  }
+
+  saveProduct() {
+    const productData = this.productoForm.value;
+    
+    const request = this.isEditing && this.productId
+      ? this.productosService.update(this.productId, productData)
+      : this.productosService.create(productData);
+
+    request.subscribe({
+      next: () => {
+        this.router.navigate(['/productos']);
+      },
+      error: (err) => {
+        alert('Error al guardar producto');
+        this.isLoading = false;
+      }
+    });
+  }
+}

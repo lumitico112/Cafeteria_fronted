@@ -1,0 +1,19 @@
+.bg-coffee {
+  background-color: var(--coffee-primary);
+}
+.text-coffee {
+  color: var(--coffee-primary);
+}
+.login-container {
+  background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-primary) 100%);
+}
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.form-control-lg {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+}

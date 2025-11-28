@@ -1,0 +1,59 @@
+<div class="login-container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card login-card shadow-lg border-0">
+    <div class="card-header bg-coffee text-white text-center py-4">
+      <i class="fas fa-coffee fa-3x mb-3"></i>
+      <h2 class="fw-bold mb-0">Cafetería El Aroma</h2>
+      <p class="mb-0 opacity-75">Bienvenido de vuelta</p>
+    </div>
+    
+    <div class="card-body p-4 p-md-5">
+      <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i> {{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="mb-4">
+          <label class="form-label fw-bold text-secondary">
+            <i class="fas fa-envelope me-2"></i>Correo electrónico
+          </label>
+          <input type="email" class="form-control form-control-lg" 
+                 formControlName="correo" 
+                 placeholder="ejemplo@correo.com"
+                 [class.is-invalid]="isFieldInvalid('correo')">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('correo')">
+            Por favor ingrese un correo válido
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold text-secondary">
+            <i class="fas fa-lock me-2"></i>Contraseña
+          </label>
+          <input type="password" class="form-control form-control-lg" 
+                 formControlName="contrasena" 
+                 placeholder="••••••••"
+                 [class.is-invalid]="isFieldInvalid('contrasena')">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('contrasena')">
+            La contraseña es requerida
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mb-4">
+          <button type="submit" class="btn btn-coffee btn-lg" [disabled]="loginForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <i class="fas fa-sign-in-alt me-2" *ngIf="!isLoading"></i>
+            {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+          </button>
+        </div>
+
+        <div class="text-center">
+          <p class="text-muted mb-0">¿No tienes cuenta?</p>
+          <a routerLink="/register" class="text-decoration-none fw-bold text-coffee">
+            Regístrate aquí
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

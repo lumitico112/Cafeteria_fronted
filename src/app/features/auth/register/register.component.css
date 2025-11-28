@@ -1,0 +1,15 @@
+.bg-coffee {
+  background-color: var(--coffee-primary);
+}
+.text-coffee {
+  color: var(--coffee-primary);
+}
+.register-container {
+  background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-primary) 100%);
+}
+.register-card {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 1rem;
+  overflow: hidden;
+}

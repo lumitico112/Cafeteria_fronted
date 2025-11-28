@@ -1,0 +1,20 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar (visible en desktop) -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse p-0">
+      <app-sidebar></app-sidebar>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5 mt-3">
+      <div class="pt-3 pb-2 mb-3">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Footer solo si es necesario, o integrado en main -->
+<app-footer></app-footer>

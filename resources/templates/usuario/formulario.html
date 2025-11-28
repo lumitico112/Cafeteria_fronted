@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${usuario.idUsuario == null ? 'Nuevo Usuario' : 'Editar Usuario'}"></title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-coffee me-2"></i>Cafetería
+            </a>
+            <div class="ms-auto">
+                <a th:href="@{/usuarios}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i th:class="${usuario.idUsuario == null} ? 'fas fa-user-plus me-2' : 'fas fa-user-edit me-2'"></i>
+                            <span th:text="${usuario.idUsuario == null ? 'Nuevo Usuario' : 'Editar Usuario'}"></span>
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+                        <form th:action="@{/usuario/guardar}" th:object="${usuario}" method="post" id="usuarioForm" novalidate>
+                            <input type="hidden" th:field="*{idUsuario}"/>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                                    <input type="text"
+                                           class="form-control"
+                                           th:field="*{nombre}"
+                                           th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"
+                                           id="nombre"
+                                           required
+                                           placeholder="Ej: Juan">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
+                                    <input type="text"
+                                           class="form-control"
+                                           th:field="*{apellido}"
+                                           th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid' : ''"
+                                           id="apellido"
+                                           required
+                                           placeholder="Ej: Pérez">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="correo" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                                <input type="email"
+                                       class="form-control"
+                                       th:field="*{correo}"
+                                       th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid' : ''"
+                                       id="correo"
+                                       required
+                                       placeholder="usuario@ejemplo.com">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="contrasena" class="form-label">
+                                    Contraseña
+                                    <span th:if="${usuario.idUsuario == null}" class="text-danger">*</span>
+                                </label>
+                                <input type="password"
+                                       class="form-control"
+                                       th:field="*{contrasena}"
+                                       th:classappend="${#fields.hasErrors('contrasena')} ? 'is-invalid' : ''"
+                                       id="contrasena"
+                                       th:attr="required=${usuario.idUsuario == null} ? 'required' : null"
+                                       placeholder="Ingrese una contraseña">
+                                <div class="form-text" th:if="${usuario.idUsuario != null}">
+                                    Dejar en blanco para mantener la contraseña actual.
+                                </div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="idRol" class="form-label">Rol <span class="text-danger">*</span></label>
+                                    <select class="form-select"
+                                            th:field="*{idRol}"
+                                            id="idRol"
+                                            required>
+                                        <option value="">Seleccione un rol</option>
+                                        <option th:each="r : ${roles}"
+                                                th:value="${r.idRol}"
+                                                th:text="${r.nombre}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3" th:if="${usuario.idUsuario != null}">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select class="form-select" th:field="*{estado}" id="estado">
+                                        <option value="ACTIVO" th:selected="${usuario.estado == T(com.cafeteria.entity.Usuario.Estado).ACTIVO}">Activo</option>
+                                        <option value="INACTIVO" th:selected="${usuario.estado == T(com.cafeteria.entity.Usuario.Estado).INACTIVO}">Inactivo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Perfil cliente: solo mostrar si rol = CLIENTE o al editar cuando tiene perfil -->
+                            <div class="mb-3"  th:if="${#lists.contains(roles.![nombre], 'CLIENTE') ? (usuario.idRol == 3) : (usuario.perfilCliente != null)}">
+                                <div class="card card-body bg-light">
+                                    <h6 class="mb-3"><i class="fas fa-id-card me-2"></i>Perfil Cliente</h6>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="telefono" class="form-label">Teléfono</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   th:field="*{telefono}"
+                                                   id="telefono"
+                                                   placeholder="Ej: 999-999-999">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="direccion" class="form-label">Dirección</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   th:field="*{direccion}"
+                                                   id="direccion"
+                                                   placeholder="Ej: Av. Ejemplo 123">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2" th:if="${usuario.puntosFidelizacion != null}">
+                                        <label class="form-label">Puntos de fidelización</label>
+                                        <input type="number" class="form-control" th:value="${usuario.puntosFidelizacion}" readonly>
+                                    </div>
+
+                                    <small class="text-muted">Los campos de perfil se crearán/actualizarán si el usuario tiene rol CLIENTE.</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a th:href="@{/usuario/lista}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="btnGuardar">
+                                    <i class="fas fa-save me-2"></i>Guardar Usuario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const form = document.getElementById('usuarioForm');
+            const btnGuardar = document.getElementById('btnGuardar');
+
+            form.addEventListener('submit', function(e) {
+                // Validación básica cliente
+                const nombre = document.getElementById('nombre').value.trim();
+                const apellido = document.getElementById('apellido').value.trim();
+                const correo = document.getElementById('correo').value.trim();
+                const idRol = document.getElementById('idRol').value;
+                const contrasena = document.getElementById('contrasena').value;
+
+                if (!nombre || !apellido || !correo || !idRol) {
+                    e.preventDefault();
+                    alert('Por favor complete todos los campos obligatorios.');
+                    return false;
+                }
+
+                // Si es creación (no hay idUsuario) contraseña es obligatoria
+                const idHidden = document.querySelector('input[name="idUsuario"]');
+                const isNew = !idHidden || !idHidden.value;
+                if (isNew && (!contrasena || contrasena.length < 6)) {
+                    e.preventDefault();
+                    alert('La contraseña es obligatoria y debe tener al menos 6 caracteres.');
+                    return false;
+                }
+
+                // Deshabilitar botón para evitar doble envío
+                btnGuardar.disabled = true;
+            });
+
+            // Opcional: habilitar/mostrar campos de perfil si se selecciona rol CLIENTE (idRol = 3 por convención)
+            const rolSelect = document.getElementById('idRol');
+            rolSelect && rolSelect.addEventListener('change', function() {
+                // Forzar re-render sesión Thymeleaf no posible cliente-side: aquí mostramos/ocultamos el bloque cliente simple
+                const clienteBlock = document.querySelector('div.card.card-body.bg-light');
+                if (!clienteBlock) return;
+                if (this.value === '3') {
+                    clienteBlock.style.display = 'block';
+                } else {
+                    // no borrar los valores, solo ocultar visualmente
+                    clienteBlock.style.display = 'none';
+                }
+            });
+
+            // Iniciar estado del bloque cliente según valor actual
+            window.addEventListener('load', function() {
+                const clienteBlock = document.querySelector('div.card.card-body.bg-light');
+                if (clienteBlock && rolSelect) {
+                    clienteBlock.style.display = (rolSelect.value === '3') ? 'block' : 'none';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-tags me-2 text-secondary"></i>Gestión de Categorías</h2>
+  <a routerLink="/categorias/nueva" class="btn btn-primary">
+    <i class="fas fa-plus me-2"></i>Nueva Categoría
+  </a>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Nombre</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th class="text-end pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of categorias">
+            <td class="ps-4 fw-bold">{{ cat.nombre }}</td>
+            <td>{{ cat.descripcion }}</td>
+            <td>
+              <span class="badge" 
+                    [class.bg-success]="cat.estado === 'ACTIVO'"
+                    [class.bg-secondary]="cat.estado === 'INACTIVO'">
+                {{ cat.estado }}
+              </span>
+            </td>
+            <td class="text-end pe-4">
+              <div class="btn-group">
+                <a [routerLink]="['/categorias/editar', cat.idCategoria]" class="btn btn-sm btn-outline-warning">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteCategoria(cat)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="categorias.length === 0 && !isLoading">
+            <td colspan="4" class="text-center py-5 text-muted">
+              <i class="fas fa-tags fa-3x mb-3"></i>
+              <p class="mb-0">No hay categorías registradas</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

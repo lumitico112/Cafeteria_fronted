@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-coffee me-2"></i>Cafetería El Aroma
+            </a>
+            <a th:href="@{/productos}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Seguir Comprando
+            </a>
+        </div>
+    </nav>
+    
+    <div class="container py-4">
+        <h2 class="mb-4"><i class="fas fa-shopping-cart me-2"></i>Carrito de Compras</h2>
+        
+        <div th:if="${carrito.items.isEmpty()}">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                <h4>Tu carrito está vacío</h4>
+                <a th:href="@{/productos}" class="btn btn-primary mt-3">
+                    <i class="fas fa-coffee me-2"></i>Ver Productos
+                </a>
+            </div>
+        </div>
+        
+        <div th:if="${!carrito.items.isEmpty()}" class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div th:each="item : ${carrito.items}" class="row mb-3 pb-3 border-bottom">
+                            <div class="col-md-2">
+                                <i class="fas fa-coffee fa-3x text-muted"></i>
+                            </div>
+                            <div class="col-md-4">
+                                <h5 th:text="${item.nombre}"></h5>
+                                <p class="text-muted small" th:text="${item.descripcion}"></p>
+                            </div>
+                            <div class="col-md-2">
+                                <p class="mb-0">S/ <span th:text="${item.precio}"></span></p>
+                            </div>
+                            <div class="col-md-2">
+                                <form th:action="@{/carrito/actualizar}" method="post" class="d-flex">
+                                    <input type="hidden" name="idProducto" th:value="${item.idProducto}">
+                                    <input type="number" name="cantidad" th:value="${item.cantidad}" 
+                                           min="1" class="form-control form-control-sm" 
+                                           onchange="this.form.submit()">
+                                </form>
+                            </div>
+                            <div class="col-md-2">
+                                <p class="mb-0 fw-bold">S/ <span th:text="${item.subtotal}"></span></p>
+                                <form th:action="@{/carrito/eliminar}" method="post">
+                                    <input type="hidden" name="idProducto" th:value="${item.idProducto}">
+                                    <button type="submit" class="btn btn-sm btn-danger mt-2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Resumen del Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>S/ <span th:text="${carrito.subtotal}"></span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Impuestos (18%):</span>
+                            <span>S/ <span th:text="${carrito.impuestos}"></span></span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong class="text-primary">S/ <span th:text="${carrito.total}"></span></strong>
+                        </div>
+                        <a th:href="@{/pedidos/checkout}" class="btn btn-success w-100 mb-2">
+                            <i class="fas fa-check me-2"></i>Proceder al Pago
+                        </a>
+                        <form th:action="@{/carrito/limpiar}" method="post">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-2"></i>Vaciar Carrito
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

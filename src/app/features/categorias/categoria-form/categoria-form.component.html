@@ -1,0 +1,45 @@
+<div class="container py-4" style="max-width: 800px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+      <i class="fas" [class.fa-plus-circle]="!isEditing" [class.fa-edit]="isEditing"></i>
+      {{ isEditing ? 'Editar Categoría' : 'Nueva Categoría' }}
+    </h2>
+    <a routerLink="/categorias" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <form [formGroup]="categoriaForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Nombre</label>
+          <input type="text" class="form-control" formControlName="nombre" 
+                 [class.is-invalid]="isFieldInvalid('nombre')">
+          <div class="invalid-feedback">El nombre es requerido</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Descripción</label>
+          <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold">Estado</label>
+          <select class="form-select" formControlName="estado">
+            <option value="ACTIVO">Activo</option>
+            <option value="INACTIVO">Inactivo</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" routerLink="/categorias" class="btn btn-outline-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary px-4" [disabled]="categoriaForm.invalid || isLoading">
+            <i class="fas fa-save me-2"></i>
+            {{ isLoading ? 'Guardando...' : 'Guardar Categoría' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

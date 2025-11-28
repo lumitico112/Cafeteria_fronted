@@ -1,0 +1,75 @@
+<div class="register-container d-flex align-items-center justify-content-center min-vh-100 py-5">
+  <div class="card register-card shadow-lg border-0">
+    <div class="card-header bg-coffee text-white text-center py-4">
+      <i class="fas fa-user-plus fa-3x mb-3"></i>
+      <h2 class="fw-bold mb-0">Crear Cuenta</h2>
+      <p class="mb-0 opacity-75">Únete a Cafetería El Aroma</p>
+    </div>
+    
+    <div class="card-body p-4 p-md-5">
+      <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i> {{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold text-secondary">Nombre</label>
+            <input type="text" class="form-control" formControlName="nombre" 
+                   [class.is-invalid]="isFieldInvalid('nombre')">
+            <div class="invalid-feedback">Nombre es requerido</div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold text-secondary">Apellido</label>
+            <input type="text" class="form-control" formControlName="apellido" 
+                   [class.is-invalid]="isFieldInvalid('apellido')">
+            <div class="invalid-feedback">Apellido es requerido</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold text-secondary">Correo electrónico</label>
+          <input type="email" class="form-control" formControlName="correo" 
+                 [class.is-invalid]="isFieldInvalid('correo')">
+          <div class="invalid-feedback">Correo válido es requerido</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold text-secondary">Contraseña</label>
+          <input type="password" class="form-control" formControlName="contrasena" 
+                 [class.is-invalid]="isFieldInvalid('contrasena')">
+          <div class="invalid-feedback">Mínimo 6 caracteres</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold text-secondary">Teléfono</label>
+          <input type="tel" class="form-control" formControlName="telefono" 
+                 [class.is-invalid]="isFieldInvalid('telefono')">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold text-secondary">Dirección</label>
+          <input type="text" class="form-control" formControlName="direccion" 
+                 [class.is-invalid]="isFieldInvalid('direccion')">
+        </div>
+
+        <div class="d-grid gap-2 mb-4">
+          <button type="submit" class="btn btn-coffee btn-lg" [disabled]="registerForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <i class="fas fa-user-check me-2" *ngIf="!isLoading"></i>
+            {{ isLoading ? 'Registrando...' : 'Registrarse' }}
+          </button>
+        </div>
+
+        <div class="text-center">
+          <p class="text-muted mb-0">¿Ya tienes cuenta?</p>
+          <a routerLink="/login" class="text-decoration-none fw-bold text-coffee">
+            Inicia sesión aquí
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
