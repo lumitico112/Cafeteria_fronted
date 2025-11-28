@@ -41,7 +41,20 @@ export class LoginComponent {
       
       this.authService.login(correo, contrasena).subscribe({
         next: () => {
-          this.router.navigate(['/dashboard']);
+          const user = this.authService.currentUserValue;
+          // Verificar por ID (3) o por nombre ('CLIENTE')
+          // El payload del token puede variar, así que comprobamos varias posibilidades
+          const isCliente = (user?.idRol === 3) || 
+                            (user?.nombreRol === 'CLIENTE') || 
+                            (user?.rol?.nombre === 'CLIENTE') ||
+                            (user?.authorities?.includes('CLIENTE')) ||
+                            (user?.authorities?.includes('ROLE_CLIENTE'));
+
+          if (isCliente) {
+            this.router.navigate(['/']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         },
         error: (err) => {
           this.isLoading = false;

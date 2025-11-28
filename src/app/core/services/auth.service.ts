@@ -17,6 +17,10 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  public get currentUserValue(): any {
+    return this.currentUserSubject.value;
+  }
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -45,7 +49,16 @@ export class AuthService {
   }
 
   register(userData: UsuarioCreate): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/register`, userData)
+    const payload = {
+      firstname: userData.nombre,
+      lastname: userData.apellido,
+      email: userData.correo,
+      password: userData.contrasena,
+      idRol: userData.idRol,
+      telefono: userData.telefono,
+      direccion: userData.direccion
+    };
+    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/register`, payload)
       .pipe(
         tap((response) => {
           if (response.token && isPlatformBrowser(this.platformId)) {

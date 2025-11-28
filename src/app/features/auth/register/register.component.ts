@@ -44,7 +44,17 @@ export class RegisterComponent {
       
       this.authService.register(this.registerForm.value).subscribe({
         next: () => {
-          this.router.navigate(['/dashboard']);
+          const user = this.authService.currentUserValue;
+          // Verificar por ID (3) o por nombre ('CLIENTE')
+          const isCliente = (user?.idRol === 3) || 
+                            (user?.nombreRol === 'CLIENTE') || 
+                            (user?.rol?.nombre === 'CLIENTE');
+
+          if (isCliente) {
+            this.router.navigate(['/']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         },
         error: (err) => {
           this.isLoading = false;
