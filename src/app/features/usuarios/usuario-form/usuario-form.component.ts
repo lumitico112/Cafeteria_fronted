@@ -60,7 +60,14 @@ export class UsuarioFormComponent implements OnInit {
     this.isLoading = true;
     this.usuariosService.getById(id).subscribe({
       next: (data) => {
-        this.usuarioForm.patchValue(data);
+        // Mapeo de campos para asegurar que se muestren en el formulario
+        const formData = {
+          ...data,
+          telefono: data.telefono || data.phone,
+          direccion: data.direccion || data.address
+        };
+        
+        this.usuarioForm.patchValue(formData);
         // La contraseña no se devuelve por seguridad, así que quitamos la validación requerida al editar
         this.usuarioForm.get('contrasena')?.clearValidators();
         this.usuarioForm.get('contrasena')?.updateValueAndValidity();
@@ -85,8 +92,14 @@ export class UsuarioFormComponent implements OnInit {
 
   onSubmit() {
     if (this.usuarioForm.valid) {
-      this.isLoading = true;
-      const data = this.usuarioForm.value;
+      const formValue = this.usuarioForm.value;
+      
+      // Mapeo simple: el backend ya acepta telefono y direccion
+      const data = {
+        ...formValue,
+        telefono: formValue.telefono,
+        direccion: formValue.direccion
+      };
       
       const request = this.isEditing && this.usuarioId
         ? this.usuariosService.update(this.usuarioId, data)

@@ -1,0 +1,96 @@
+<div class="container-fluid fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Gestión de Inventario</h2>
+    <button class="btn btn-primary" (click)="cargarInventario()">
+      <i class="bi bi-arrow-clockwise me-2"></i>Actualizar
+    </button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4">Producto</th>
+              <th>Categoría</th>
+              <th class="text-center">Stock Actual</th>
+              <th class="text-center">Stock Mínimo</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Última Actualización</th>
+              <th class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="isLoading">
+              <td colspan="7" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Cargando...</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!isLoading && inventario.length === 0">
+              <td colspan="7" class="text-center py-5 text-muted">
+                No hay registros de inventario.
+              </td>
+            </tr>
+            <tr *ngFor="let item of inventario">
+              <td class="ps-4">
+                <div class="fw-bold">{{ item.producto?.nombre }}</div>
+                <small class="text-muted">ID: {{ item.idInventario }}</small>
+              </td>
+              <td>{{ item.producto?.categoria?.nombre }}</td>
+              <td class="text-center">
+                <span class="fw-bold fs-5">{{ item.cantidadActual }}</span>
+                <small class="text-muted ms-1">{{ item.unidadMedida || 'unid.' }}</small>
+              </td>
+              <td class="text-center">{{ item.stockMinimo }}</td>
+              <td class="text-center">
+                <span [class]="getBadgeClass(getStockStatus(item))">
+                  {{ getStockStatus(item) }}
+                </span>
+              </td>
+              <td class="text-center">
+                {{ item.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-outline-primary" (click)="editarStock(item)" title="Ajustar Stock">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edición de Stock -->
+<div class="modal fade show" [class.d-block]="showModal" tabindex="-1" *ngIf="showModal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ajustar Stock: {{ selectedItem?.producto?.nombre }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="guardarCambios()">
+          <div class="mb-3">
+            <label class="form-label">Cantidad Actual</label>
+            <input type="number" class="form-control" [(ngModel)]="editCantidad" name="cantidadActual" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Stock Mínimo</label>
+            <input type="number" class="form-control" [(ngModel)]="editStockMinimo" name="stockMinimo" min="0" required>
+            <div class="form-text">Alerta cuando el stock sea igual o menor a este valor.</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="guardarCambios()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>

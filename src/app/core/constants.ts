@@ -45,8 +45,9 @@ export enum TipoPromocion {
 export const API_CONFIG = {
   BASE_URL: 'http://localhost:8080',
   AUTH: 'http://localhost:8080/auth',
-  USUARIOS: 'http://localhost:8080/usuario',    // Singular
+  USUARIOS: 'http://localhost:8080/usuario',    // Singular (Correcto según servidor)
   PRODUCTOS: 'http://localhost:8080/productos', // Plural
   PEDIDOS: 'http://localhost:8080/pedidos',     // Plural
-  CATEGORIAS: 'http://localhost:8080/categorias' // Plural
+  CATEGORIAS: 'http://localhost:8080/categorias', // Plural
+  INVENTARIO: 'http://localhost:8080/inventario' // Plural
 };

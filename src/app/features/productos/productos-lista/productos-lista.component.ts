@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductosService } from '../productos.service';
 import { Producto } from '../../../core/models/producto.model';
 import { FormsModule } from '@angular/forms';
 import { ProductoFormComponent } from '../producto-form/producto-form.component';
+
+import { CategoriasService } from '../../categorias/categorias.service';
+import { Categoria } from '../../../core/models/categoria.model';
 
 @Component({
   selector: 'app-productos-lista',
@@ -16,15 +19,32 @@ import { ProductoFormComponent } from '../producto-form/producto-form.component'
 export class ProductosListaComponent implements OnInit {
   productos: Producto[] = [];
   filteredProductos: Producto[] = [];
+  categorias: Categoria[] = [];
   isLoading = true;
   searchTerm = '';
   selectedCategory = '';
   showModal = false;
 
-  constructor(private productosService: ProductosService) {}
+  constructor(
+    private productosService: ProductosService,
+    private categoriasService: CategoriasService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit() {
-    this.loadProductos();
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadProductos();
+      this.loadCategorias();
+    }
+  }
+
+  loadCategorias() {
+    this.categoriasService.getAll().subscribe({
+      next: (data) => {
+        this.categorias = data;
+      },
+      error: (err) => console.error('Error loading categories', err)
+    });
   }
 
   loadProductos() {

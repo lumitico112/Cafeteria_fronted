@@ -466,7 +466,8 @@ Response Success (200):
     "idRol": 1,
     "nombreRol": "ADMIN",
     "telefono": "987654321",
-    "direccion": "Av. Principal 123"
+    "direccion": "Calle Principal 123",
+    "puntosFidelizacion": 0
   }
 ]
 

@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { UsuariosService } from '../usuarios.service';
 import { Usuario } from '../../../core/models/usuario.model';
 import { UsuarioFormComponent } from '../usuario-form/usuario-form.component';
@@ -18,17 +18,29 @@ export class UsuariosListaComponent implements OnInit {
   showModal = false;
   selectedUsuarioId?: number;
 
-  constructor(private usuariosService: UsuariosService) {}
+  showDetailsModal = false;
+  selectedUsuario?: Usuario;
+
+  constructor(
+    private usuariosService: UsuariosService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit() {
-    this.cargarUsuarios();
+    if (isPlatformBrowser(this.platformId)) {
+      this.cargarUsuarios();
+    }
   }
 
   cargarUsuarios() {
     this.isLoading = true;
     this.usuariosService.getAll().subscribe({
       next: (data) => {
-        this.usuarios = data;
+        this.usuarios = data.map(u => ({
+          ...u,
+          telefono: u.telefono || u.phone || '',
+          direccion: u.direccion || u.address || ''
+        }));
         this.isLoading = false;
       },
       error: (err) => {
@@ -41,16 +53,11 @@ export class UsuariosListaComponent implements OnInit {
   crearUsuario() {
     this.selectedUsuarioId = undefined;
     this.showModal = true;
-    // Reset form logic handled in child component via isModal input or manual reset if needed
   }
 
   editarUsuario(usuario: Usuario) {
     this.selectedUsuarioId = usuario.idUsuario;
     this.showModal = true;
-    // We need to trigger the load in the child component. 
-    // Since *ngIf destroys the component when modal is closed, it will re-init when opened.
-    // We can pass the ID via input if we modify the child, or just rely on the child's OnInit if we pass ID as input.
-    // For now, let's modify the child to accept ID input or use ViewChild to call load.
     setTimeout(() => {
       if (this.usuarioForm) {
         this.usuarioForm.isEditing = true;
@@ -58,6 +65,38 @@ export class UsuariosListaComponent implements OnInit {
         this.usuarioForm.loadUsuario(usuario.idUsuario!);
       }
     }, 0);
+  }
+
+  verDetalles(usuario: Usuario) {
+    this.selectedUsuario = usuario;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal() {
+    this.showDetailsModal = false;
+    this.selectedUsuario = undefined;
+  }
+
+  toggleEstado(usuario: Usuario) {
+    if (!usuario.idUsuario) return;
+    
+    const nuevoEstado = usuario.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+    const estadoOriginal = usuario.estado;
+    
+    // Actualización optimista
+    usuario.estado = nuevoEstado;
+    
+    // Preparamos el objeto para enviar (asegurando que tenga todos los campos necesarios)
+    const usuarioActualizado = { ...usuario, estado: nuevoEstado };
+    
+    this.usuariosService.update(usuario.idUsuario, usuarioActualizado).subscribe({
+      error: (err) => {
+        console.error('Error al actualizar estado', err);
+        // Revertir cambios si falla
+        usuario.estado = estadoOriginal;
+        alert('Error al actualizar el estado del usuario');
+      }
+    });
   }
 
   eliminarUsuario(usuario: Usuario) {

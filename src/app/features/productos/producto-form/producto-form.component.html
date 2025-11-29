@@ -44,9 +44,7 @@
                 <label class="form-label fw-bold">Categoría</label>
                 <select class="form-select" formControlName="idCategoria" [class.is-invalid]="isFieldInvalid('idCategoria')">
                   <option value="">Seleccione una categoría</option>
-                  <option value="1">Bebidas Calientes</option>
-                  <option value="2">Bebidas Frías</option>
-                  <option value="3">Postres</option>
+                  <option *ngFor="let cat of categorias" [value]="cat.idCategoria">{{ cat.nombre }}</option>
                 </select>
               </div>
               <div class="col-md-6 mb-3">
@@ -63,9 +61,24 @@
           <div class="col-md-4">
             <div class="mb-3">
               <label class="form-label fw-bold">Imagen del Producto</label>
-              <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
-              <div class="mt-2 text-center p-3 border rounded bg-white" *ngIf="previewUrl">
-                <img [src]="previewUrl" class="img-fluid rounded" style="max-height: 200px;">
+              
+              <!-- Opción 1: Subir Archivo -->
+              <div class="mb-2">
+                <label class="form-label small text-muted">Subir desde dispositivo</label>
+                <input type="file" class="form-control form-control-sm" (change)="onFileSelected($event)" accept="image/*">
+              </div>
+
+              <div class="text-center my-2 text-muted small">- O -</div>
+
+              <!-- Opción 2: URL -->
+              <div class="mb-3">
+                <label class="form-label small text-muted">URL de la imagen</label>
+                <input type="text" class="form-control form-control-sm" formControlName="imagenUrl" placeholder="https://ejemplo.com/imagen.jpg" (input)="onUrlChange($event)">
+              </div>
+
+              <!-- Preview -->
+              <div class="mt-2 text-center p-3 border rounded bg-white" *ngIf="previewUrl || productoForm.get('imagenUrl')?.value">
+                <img [src]="previewUrl || productoForm.get('imagenUrl')?.value" class="img-fluid rounded" style="max-height: 200px;" onerror="this.src='assets/placeholder.png'">
               </div>
             </div>
           </div>

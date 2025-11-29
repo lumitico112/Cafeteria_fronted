@@ -7,6 +7,7 @@ export interface Inventario {
   cantidadActual: number;
   stockMinimo: number;
   unidadMedida?: string;
+  fechaActualizacion?: string;
 }
 
 export interface InventarioUpdate {

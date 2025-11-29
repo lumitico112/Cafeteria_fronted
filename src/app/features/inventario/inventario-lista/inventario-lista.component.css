@@ -1,0 +1,19 @@
+/* Estilos para el componente de inventario */
+.table th {
+  font-weight: 600;
+  color: #495057;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.5em 0.8em;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

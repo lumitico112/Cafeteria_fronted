@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductosService } from '../productos.service';
+import { CategoriasService } from '../../categorias/categorias.service';
+import { Categoria } from '../../../core/models/categoria.model';
 
 @Component({
   selector: 'app-producto-form',
@@ -22,10 +24,12 @@ export class ProductoFormComponent implements OnInit {
   productId?: number;
   previewUrl: string | null = null;
   selectedFile: File | null = null;
+  categorias: Categoria[] = [];
 
   constructor(
     private fb: FormBuilder,
     private productosService: ProductosService,
+    private categoriasService: CategoriasService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -41,6 +45,7 @@ export class ProductoFormComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadCategorias();
     // Only check route params if NOT in modal mode
     if (!this.isModal) {
       this.productId = Number(this.route.snapshot.paramMap.get('id'));
@@ -49,6 +54,17 @@ export class ProductoFormComponent implements OnInit {
         this.loadProduct(this.productId);
       }
     }
+  }
+
+  loadCategorias() {
+    this.categoriasService.getAll().subscribe({
+      next: (data) => {
+        this.categorias = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar categorías', err);
+      }
+    });
   }
 
   loadProduct(id: number) {
@@ -82,6 +98,14 @@ export class ProductoFormComponent implements OnInit {
         this.previewUrl = reader.result as string;
       };
       reader.readAsDataURL(file);
+    }
+  }
+
+  onUrlChange(event: any) {
+    const url = event.target.value;
+    if (url) {
+      this.previewUrl = null; // Limpiar preview de archivo si se escribe URL
+      this.selectedFile = null; // Limpiar archivo seleccionado
     }
   }
 

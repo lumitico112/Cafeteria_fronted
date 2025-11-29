@@ -17,6 +17,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component')
       .then(m => m.RegisterComponent)
   },
+  { 
+    path: 'logout', 
+    loadComponent: () => import('./features/auth/logout/logout.component')
+      .then(m => m.LogoutComponent)
+  },
   {
     path: '',
     canActivate: [authGuard],
@@ -81,6 +86,11 @@ export const routes: Routes = [
       { 
         path: 'usuarios', 
         loadComponent: () => import('./features/usuarios/usuarios-lista/usuarios-lista.component').then(m => m.UsuariosListaComponent),
+        canActivate: [authGuard]
+      },
+      { 
+        path: 'inventario', 
+        loadComponent: () => import('./features/inventario/inventario-lista/inventario-lista.component').then(m => m.InventarioListaComponent),
         canActivate: [authGuard]
       },
     ]
