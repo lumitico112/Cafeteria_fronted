@@ -1,8 +1,8 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2><i class="fas fa-tags me-2 text-secondary"></i>Gestión de Categorías</h2>
-  <a routerLink="/categorias/nueva" class="btn btn-primary">
+  <button class="btn btn-primary" (click)="openModal()">
     <i class="fas fa-plus me-2"></i>Nueva Categoría
-  </a>
+  </button>
 </div>
 
 <div class="card shadow-sm border-0">
@@ -39,6 +39,21 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Creación de Categoría -->
+<div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0,0,0,0.5);" *ngIf="showModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nueva Categoría</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <app-categoria-form [isModal]="true" (onSave)="onCategoriaSaved()" (onCancel)="closeModal()"></app-categoria-form>
+      </div>
     </div>
   </div>
 </div>

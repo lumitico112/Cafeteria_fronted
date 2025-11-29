@@ -1,10 +1,11 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { DashboardStats } from './dashboard.model';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { ProductosService } from '../productos/productos.service';
 import { PedidosService } from '../pedidos/pedidos.service';
+import { AuthService } from '../../core/services/auth.service';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -29,6 +30,8 @@ export class DashboardComponent implements OnInit {
     private usuariosService: UsuariosService,
     private productosService: ProductosService,
     private pedidosService: PedidosService,
+    private authService: AuthService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -36,6 +39,13 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     if (this.isBrowser) {
+      const role = this.authService.getRole();
+      
+      if (role === 'CLIENTE') {
+        this.router.navigate(['/']); // Redirigir fuera si es cliente
+        return;
+      }
+
       this.loadStats();
     } else {
       this.isLoading = false; // No cargar en el servidor

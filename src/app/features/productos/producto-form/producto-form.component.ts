@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -12,6 +12,10 @@ import { ProductosService } from '../productos.service';
   styleUrls: ['./producto-form.component.css']
 })
 export class ProductoFormComponent implements OnInit {
+  @Input() isModal = false;
+  @Output() onCancel = new EventEmitter<void>();
+  @Output() onSave = new EventEmitter<void>();
+
   productoForm: FormGroup;
   isEditing = false;
   isLoading = false;
@@ -37,10 +41,13 @@ export class ProductoFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.productId = Number(this.route.snapshot.paramMap.get('id'));
-    if (this.productId) {
-      this.isEditing = true;
-      this.loadProduct(this.productId);
+    // Only check route params if NOT in modal mode
+    if (!this.isModal) {
+      this.productId = Number(this.route.snapshot.paramMap.get('id'));
+      if (this.productId) {
+        this.isEditing = true;
+        this.loadProduct(this.productId);
+      }
     }
   }
 
@@ -54,7 +61,8 @@ export class ProductoFormComponent implements OnInit {
       },
       error: () => {
         alert('Error al cargar producto');
-        this.router.navigate(['/productos']);
+        if (!this.isModal) this.router.navigate(['/productos']);
+        else this.onCancel.emit();
       }
     });
   }
@@ -112,12 +120,28 @@ export class ProductoFormComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        this.router.navigate(['/productos']);
+        if (this.isModal) {
+          this.onSave.emit();
+          this.productoForm.reset(); // Reset form for next use
+          this.previewUrl = null;
+          this.selectedFile = null;
+          this.isLoading = false;
+        } else {
+          this.router.navigate(['/productos']);
+        }
       },
       error: (err) => {
         alert('Error al guardar producto');
         this.isLoading = false;
       }
     });
+  }
+
+  cancel() {
+    if (this.isModal) {
+      this.onCancel.emit();
+    } else {
+      this.router.navigate(['/productos']);
+    }
   }
 }

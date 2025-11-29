@@ -1,5 +1,5 @@
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container py-4" [class.p-0]="isModal">
+  <div class="d-flex justify-content-between align-items-center mb-4" *ngIf="!isModal">
     <h2>
       <i class="fas" [class.fa-plus-circle]="!isEditing" [class.fa-edit]="isEditing"></i>
       {{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}
@@ -9,8 +9,8 @@
     </a>
   </div>
 
-  <div class="card shadow-sm border-0">
-    <div class="card-body p-4">
+  <div class="card shadow-sm border-0" [class.shadow-none]="isModal">
+    <div class="card-body p-4" [class.p-0]="isModal">
       <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
         <div class="row g-4">
           <!-- Columna Izquierda: Datos Principales -->
@@ -74,7 +74,7 @@
         <hr class="my-4">
 
         <div class="d-flex justify-content-end gap-2">
-          <button type="button" routerLink="/productos" class="btn btn-outline-secondary">Cancelar</button>
+          <button type="button" (click)="cancel()" class="btn btn-outline-secondary">Cancelar</button>
           <button type="submit" class="btn btn-primary px-4" [disabled]="productoForm.invalid || isLoading">
             <i class="fas fa-save me-2"></i>
             {{ isLoading ? 'Guardando...' : 'Guardar Producto' }}

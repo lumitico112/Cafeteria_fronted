@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { UsuariosService } from '../../usuarios/usuarios.service';
 import { LoginRequest } from '../../../core/models/auth.models';
 import { ROLES } from '../../../core/constants';
 
@@ -21,6 +22,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private usuariosService: UsuariosService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -53,24 +55,51 @@ export class LoginComponent {
       
       this.authService.login(credentials).subscribe({
         next: () => {
-          const user = this.authService.currentUserValue;
-          console.log('Usuario logueado:', user); // Para depuración
+          // Como el token no trae el rol, buscamos el usuario por su correo
+          this.usuariosService.getAll().subscribe({
+            next: (users) => {
+              const currentUser = users.find(u => u.correo === correo);
+              
+              if (currentUser) {
+                // Actualizamos el usuario en el AuthService con la info completa (incluyendo rol)
+                this.authService.setCurrentUser(currentUser);
+                
+                // Ahora sí verificamos el rol
+                const role = this.authService.getRole();
 
-          // Verificar si es cliente (ID 3 o rol CLIENTE)
-          // Usamos == para permitir comparación flexible (string/number)
-          const isCliente = (user?.idRol == 3) || 
-                            (user?.nombreRol === 'CLIENTE') || 
-                            (user?.rol?.nombre === 'CLIENTE') ||
-                            (user?.authorities?.includes('CLIENTE')) ||
-                            (user?.authorities?.includes('ROLE_CLIENTE')) ||
-                            // Verificación adicional por si authorities es array de objetos
-                            (Array.isArray(user?.authorities) && user.authorities.some((a: any) => a.authority === 'ROLE_CLIENTE' || a.authority === 'CLIENTE'));
-
-          if (isCliente) {
-            this.router.navigate(['/']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
+                if (role === 'ADMIN' || role === 'EMPLEADO') {
+                  this.router.navigate(['/dashboard']);
+                } else {
+                  this.router.navigate(['/']);
+                }
+              } else {
+                // Fallback si no encontramos el usuario (raro si hizo login)
+                this.router.navigate(['/']);
+              }
+            },
+            error: (err) => {
+              // Si es 403 (Forbidden), es esperado para clientes que no pueden listar usuarios.
+              // No lo tratamos como un error crítico en consola.
+              if (err.status !== 403) {
+                console.error('Error al obtener detalles del usuario', err);
+              }
+              
+              // Construimos un usuario fallback
+              // Usamos la parte del correo antes del @ como nombre provisional
+              const nombreProvisional = correo.split('@')[0];
+              
+              const fallbackUser = {
+                correo: correo,
+                nombre: nombreProvisional, 
+                idRol: 3, // Asumimos Cliente
+                nombreRol: 'CLIENTE',
+                sub: correo // Para compatibilidad
+              };
+              
+              this.authService.setCurrentUser(fallbackUser);
+              this.router.navigate(['/']); 
+            }
+          });
         },
         error: (err) => {
           this.isLoading = false;

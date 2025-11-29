@@ -25,8 +25,18 @@ export class AuthService {
     // Cargar usuario desde localStorage al iniciar solo en el navegador
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('jwt_token');
+      const savedUser = localStorage.getItem('user_data');
+      
       if (token) {
-        this.loadUserFromToken(token);
+        if (savedUser) {
+          try {
+            this.currentUserSubject.next(JSON.parse(savedUser));
+          } catch {
+            this.loadUserFromToken(token);
+          }
+        } else {
+          this.loadUserFromToken(token);
+        }
       }
     }
   }
@@ -37,6 +47,7 @@ export class AuthService {
         tap((response) => {
           if (response.token && isPlatformBrowser(this.platformId)) {
             localStorage.setItem('jwt_token', response.token);
+            // No guardamos user_data aquí todavía, lo hará setCurrentUser
             this.loadUserFromToken(response.token);
           }
         })
@@ -50,6 +61,7 @@ export class AuthService {
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('jwt_token');
+      localStorage.removeItem('user_data');
     }
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
@@ -66,6 +78,13 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  setCurrentUser(user: any): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('user_data', JSON.stringify(user));
+    }
+    this.currentUserSubject.next(user);
+  }
+
   private loadUserFromToken(token: string): void {
     try {
       // Decodificar JWT para obtener información del usuario
@@ -76,5 +95,37 @@ export class AuthService {
       console.error('Error decoding token', e);
       this.logout();
     }
+  }
+
+  getRole(): string | null {
+    const user = this.currentUserValue;
+    if (!user) return null;
+
+    // Priorizar nombreRol si existe
+    if (user.nombreRol) return user.nombreRol;
+    
+    // Verificar idRol
+    if (user.idRol === 1) return 'ADMIN';
+    if (user.idRol === 2) return 'EMPLEADO';
+    if (user.idRol === 3) return 'CLIENTE';
+
+    // Verificar authorities (Spring Security standard)
+    if (user.authorities) {
+      if (typeof user.authorities === 'string') return user.authorities;
+      if (Array.isArray(user.authorities)) {
+        const roleAuth = user.authorities.find((a: any) => 
+          typeof a === 'string' ? a.includes('ADMIN') || a.includes('EMPLEADO') || a.includes('CLIENTE') :
+          a.authority?.includes('ADMIN') || a.authority?.includes('EMPLEADO') || a.authority?.includes('CLIENTE')
+        );
+        if (roleAuth) {
+          const authString = typeof roleAuth === 'string' ? roleAuth : roleAuth.authority;
+          if (authString.includes('ADMIN')) return 'ADMIN';
+          if (authString.includes('EMPLEADO')) return 'EMPLEADO';
+          if (authString.includes('CLIENTE')) return 'CLIENTE';
+        }
+      }
+    }
+
+    return null;
   }
 }

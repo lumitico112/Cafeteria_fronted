@@ -1,19 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { UsuariosService } from '../usuarios.service';
 import { Usuario } from '../../../core/models/usuario.model';
+import { UsuarioFormComponent } from '../usuario-form/usuario-form.component';
 
 @Component({
   selector: 'app-usuarios-lista',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UsuarioFormComponent],
   templateUrl: './usuarios-lista.component.html',
   styleUrls: ['./usuarios-lista.component.css']
 })
 export class UsuariosListaComponent implements OnInit {
+  @ViewChild(UsuarioFormComponent) usuarioForm!: UsuarioFormComponent;
   usuarios: Usuario[] = [];
   isLoading = true;
+  showModal = false;
+  selectedUsuarioId?: number;
 
   constructor(private usuariosService: UsuariosService) {}
 
@@ -36,26 +39,34 @@ export class UsuariosListaComponent implements OnInit {
   }
 
   crearUsuario() {
-    // Implementar navegación a formulario de creación
-    alert('Funcionalidad de crear usuario pendiente de implementar');
+    this.selectedUsuarioId = undefined;
+    this.showModal = true;
+    // Reset form logic handled in child component via isModal input or manual reset if needed
   }
 
   editarUsuario(usuario: Usuario) {
-    // Implementar navegación a formulario de edición
-    alert(`Editar usuario: ${usuario.nombre}`);
+    this.selectedUsuarioId = usuario.idUsuario;
+    this.showModal = true;
+    // We need to trigger the load in the child component. 
+    // Since *ngIf destroys the component when modal is closed, it will re-init when opened.
+    // We can pass the ID via input if we modify the child, or just rely on the child's OnInit if we pass ID as input.
+    // For now, let's modify the child to accept ID input or use ViewChild to call load.
+    setTimeout(() => {
+      if (this.usuarioForm) {
+        this.usuarioForm.isEditing = true;
+        this.usuarioForm.usuarioId = usuario.idUsuario;
+        this.usuarioForm.loadUsuario(usuario.idUsuario!);
+      }
+    }, 0);
   }
 
   eliminarUsuario(usuario: Usuario) {
-    if (!usuario.idUsuario) {
-      alert('Error: El usuario no tiene ID válido');
-      return;
-    }
+    if (!usuario.idUsuario) return;
     
     if (confirm(`¿Está seguro de eliminar al usuario ${usuario.nombre}?`)) {
       this.usuariosService.delete(usuario.idUsuario).subscribe({
         next: () => {
           this.cargarUsuarios();
-          alert('Usuario eliminado exitosamente');
         },
         error: (err) => {
           console.error('Error al eliminar usuario', err);
@@ -63,5 +74,15 @@ export class UsuariosListaComponent implements OnInit {
         }
       });
     }
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedUsuarioId = undefined;
+  }
+
+  onUsuarioSaved() {
+    this.closeModal();
+    this.cargarUsuarios();
   }
 }

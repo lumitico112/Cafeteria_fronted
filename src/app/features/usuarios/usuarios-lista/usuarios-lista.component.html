@@ -68,3 +68,18 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Usuario -->
+<div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0,0,0,0.5);" *ngIf="showModal">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ selectedUsuarioId ? 'Editar Usuario' : 'Nuevo Usuario' }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <app-usuario-form [isModal]="true" (onSave)="onUsuarioSaved()" (onCancel)="closeModal()"></app-usuario-form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -27,8 +27,8 @@
     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
       <i class="fas fa-user-circle fa-2x me-2"></i>
       <strong>
-        @if (currentUser$ | async; as user) {
-          {{ user.sub }}
+        @if (currentUser) {
+          {{ currentUser.nombre || currentUser.sub }}
         } @else {
           Usuario
         }

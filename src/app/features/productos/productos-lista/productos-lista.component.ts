@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { ProductosService } from '../productos.service';
 import { Producto } from '../../../core/models/producto.model';
 import { FormsModule } from '@angular/forms';
+import { ProductoFormComponent } from '../producto-form/producto-form.component';
 
 @Component({
   selector: 'app-productos-lista',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ProductoFormComponent],
   templateUrl: './productos-lista.component.html',
   styleUrls: ['./productos-lista.component.css']
 })
@@ -18,6 +19,7 @@ export class ProductosListaComponent implements OnInit {
   isLoading = true;
   searchTerm = '';
   selectedCategory = '';
+  showModal = false;
 
   constructor(private productosService: ProductosService) {}
 
@@ -32,6 +34,7 @@ export class ProductosListaComponent implements OnInit {
         this.productos = data;
         this.filteredProductos = data;
         this.isLoading = false;
+        this.filterProducts(); // Re-apply filters if any
       },
       error: (err) => {
         console.error('Error loading products', err);
@@ -59,5 +62,18 @@ export class ProductosListaComponent implements OnInit {
         error: (err) => alert('Error al eliminar producto')
       });
     }
+  }
+
+  openModal() {
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  onProductSaved() {
+    this.closeModal();
+    this.loadProductos();
   }
 }

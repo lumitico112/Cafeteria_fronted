@@ -1,0 +1,89 @@
+<div class="container py-4" [style.max-width]="isModal ? '100%' : '800px'" [class.p-0]="isModal">
+  <div class="d-flex justify-content-between align-items-center mb-4" *ngIf="!isModal">
+    <h2>
+      <i class="fas" [class.fa-user-plus]="!isEditing" [class.fa-user-edit]="isEditing"></i>
+      {{ isEditing ? 'Editar Usuario' : 'Nuevo Usuario' }}
+    </h2>
+    <a routerLink="/usuarios" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+  </div>
+
+  <div class="card shadow-sm border-0" [class.shadow-none]="isModal">
+    <div class="card-body p-4" [class.p-0]="isModal">
+      <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()">
+        <div class="row g-3">
+          <!-- Nombre y Apellido -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Nombre</label>
+            <input type="text" class="form-control" formControlName="nombre" 
+                   [class.is-invalid]="isFieldInvalid('nombre')">
+            <div class="invalid-feedback">El nombre es requerido</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Apellido</label>
+            <input type="text" class="form-control" formControlName="apellido" 
+                   [class.is-invalid]="isFieldInvalid('apellido')">
+            <div class="invalid-feedback">El apellido es requerido</div>
+          </div>
+
+          <!-- Correo y Contraseña -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Correo Electrónico</label>
+            <input type="email" class="form-control" formControlName="correo" 
+                   [class.is-invalid]="isFieldInvalid('correo')">
+            <div class="invalid-feedback">Correo inválido o requerido</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Contraseña</label>
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="contrasena" 
+                     [class.is-invalid]="isFieldInvalid('contrasena')"
+                     [placeholder]="isEditing ? 'Dejar en blanco para no cambiar' : ''">
+              <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+                <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+              </button>
+              <div class="invalid-feedback">Mínimo 6 caracteres</div>
+            </div>
+          </div>
+
+          <!-- Rol y Estado -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Rol</label>
+            <select class="form-select" formControlName="idRol" [class.is-invalid]="isFieldInvalid('idRol')">
+              <option *ngFor="let rol of roles" [value]="rol.id">{{ rol.nombre }}</option>
+            </select>
+            <div class="invalid-feedback">El rol es requerido</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Estado</label>
+            <select class="form-select" formControlName="estado">
+              <option value="ACTIVO">Activo</option>
+              <option value="INACTIVO">Inactivo</option>
+            </select>
+          </div>
+
+          <!-- Teléfono y Dirección -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Teléfono</label>
+            <input type="text" class="form-control" formControlName="telefono">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Dirección</label>
+            <input type="text" class="form-control" formControlName="direccion">
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" (click)="cancel()" class="btn btn-outline-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary px-4" [disabled]="usuarioForm.invalid || isLoading">
+            <i class="fas fa-save me-2"></i>
+            {{ isLoading ? 'Guardando...' : 'Guardar Usuario' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

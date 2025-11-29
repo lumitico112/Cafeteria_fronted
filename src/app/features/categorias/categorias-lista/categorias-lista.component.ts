@@ -3,17 +3,19 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CategoriasService } from '../categorias.service';
 import { Categoria } from '../../../core/models/categoria.model';
+import { CategoriaFormComponent } from '../categoria-form/categoria-form.component';
 
 @Component({
   selector: 'app-categorias-lista',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, CategoriaFormComponent],
   templateUrl: './categorias-lista.component.html',
   styleUrls: ['./categorias-lista.component.css']
 })
 export class CategoriasListaComponent implements OnInit {
   categorias: Categoria[] = [];
   isLoading = true;
+  showModal = false;
 
   constructor(private categoriasService: CategoriasService) {}
 
@@ -39,5 +41,18 @@ export class CategoriasListaComponent implements OnInit {
         error: () => alert('Error al eliminar categoría')
       });
     }
+  }
+
+  openModal() {
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  onCategoriaSaved() {
+    this.closeModal();
+    this.loadCategorias();
   }
 }

@@ -1,0 +1,13 @@
+/* Estilos específicos para el formulario de usuario */
+.card {
+  border-radius: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.input-group .btn {
+  z-index: 0;
+}

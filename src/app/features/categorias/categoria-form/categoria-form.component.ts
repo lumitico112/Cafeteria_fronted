@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -12,6 +12,10 @@ import { CategoriasService } from '../categorias.service';
   styleUrls: ['./categoria-form.component.css']
 })
 export class CategoriaFormComponent implements OnInit {
+  @Input() isModal = false;
+  @Output() onCancel = new EventEmitter<void>();
+  @Output() onSave = new EventEmitter<void>();
+
   categoriaForm: FormGroup;
   isEditing = false;
   isLoading = false;
@@ -31,10 +35,12 @@ export class CategoriaFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.categoriaId = Number(this.route.snapshot.paramMap.get('id'));
-    if (this.categoriaId) {
-      this.isEditing = true;
-      this.loadCategoria(this.categoriaId);
+    if (!this.isModal) {
+      this.categoriaId = Number(this.route.snapshot.paramMap.get('id'));
+      if (this.categoriaId) {
+        this.isEditing = true;
+        this.loadCategoria(this.categoriaId);
+      }
     }
   }
 
@@ -47,7 +53,8 @@ export class CategoriaFormComponent implements OnInit {
       },
       error: () => {
         alert('Error al cargar categoría');
-        this.router.navigate(['/categorias']);
+        if (!this.isModal) this.router.navigate(['/categorias']);
+        else this.onCancel.emit();
       }
     });
   }
@@ -67,7 +74,15 @@ export class CategoriaFormComponent implements OnInit {
         : this.categoriasService.create(data);
 
       request.subscribe({
-        next: () => this.router.navigate(['/categorias']),
+        next: () => {
+          if (this.isModal) {
+            this.onSave.emit();
+            this.categoriaForm.reset();
+            this.isLoading = false;
+          } else {
+            this.router.navigate(['/categorias']);
+          }
+        },
         error: () => {
           alert('Error al guardar categoría');
           this.isLoading = false;
@@ -75,6 +90,14 @@ export class CategoriaFormComponent implements OnInit {
       });
     } else {
       this.categoriaForm.markAllAsTouched();
+    }
+  }
+
+  cancel() {
+    if (this.isModal) {
+      this.onCancel.emit();
+    } else {
+      this.router.navigate(['/categorias']);
     }
   }
 }
