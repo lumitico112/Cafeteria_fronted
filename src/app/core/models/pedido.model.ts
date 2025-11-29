@@ -1,23 +1,26 @@
+import { Usuario } from './usuario.model';
+import { Producto } from './producto.model';
+import { Pago } from './pago.model';
+
 export interface DetallePedido {
-  idDetalle?: number;
-  idProducto: number;
-  nombreProducto?: string;
+  idDetalle: number;
+  pedido?: Pedido;
+  producto: Producto;
   cantidad: number;
-  precioUnitario?: number;
-  subtotal?: number;
+  precioUnitario: number;
+  subtotal: number;
 }
 
 export interface Pedido {
   idPedido: number;
+  usuario: Usuario;
+  atendidoPor?: Usuario;
   fecha: string;
   estado: 'PENDIENTE' | 'PREPARACION' | 'LISTO' | 'ENTREGADO' | 'CANCELADO';
-  tipoEntrega: 'DELIVERY' | 'RETIRO' | 'LOCAL';
   total: number;
-  idUsuario: number;
-  nombreCliente: string;
-  atendidoPor?: number;
-  nombreEmpleado?: string;
-  detalles: DetallePedido[];
+  tipoEntrega: 'DELIVERY' | 'RETIRO' | 'LOCAL';
+  detalles?: DetallePedido[];
+  pagos?: Pago[];
 }
 
 export interface PedidoCreate {

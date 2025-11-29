@@ -6,7 +6,6 @@ export interface Permiso {
 
 export interface Rol {
   idRol: number;
-  nombre: string;
+  nombre: string;      // "ADMIN", "EMPLEADO", "CLIENTE"
   descripcion?: string;
-  permisos?: Permiso[];
 }

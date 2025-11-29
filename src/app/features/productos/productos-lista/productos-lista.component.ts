@@ -41,10 +41,11 @@ export class ProductosListaComponent implements OnInit {
   }
 
   filterProducts() {
+    const term = this.searchTerm.toLowerCase();
     this.filteredProductos = this.productos.filter(p => {
-      const matchesSearch = p.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                            p.descripcion.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesCategory = this.selectedCategory ? p.idCategoria.toString() === this.selectedCategory : true;
+      const matchesSearch = p.nombre.toLowerCase().includes(term) || 
+                            (p.descripcion || '').toLowerCase().includes(term);
+      const matchesCategory = this.selectedCategory ? p.idCategoria?.toString() === this.selectedCategory : true;
       return matchesSearch && matchesCategory;
     });
   }

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { Producto, ProductoCreate } from '../../core/models/producto.model';
+import { API_CONFIG } from '../../core/constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductosService {
-  private endpoint = '/productos';
+  private endpoint = API_CONFIG.PRODUCTOS;
 
   constructor(private api: ApiService) {}
 

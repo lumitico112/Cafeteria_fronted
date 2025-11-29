@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { Pedido, PedidoCreate } from '../../core/models/pedido.model';
+import { API_CONFIG } from '../../core/constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PedidosService {
-  private endpoint = '/pedidos';
+  private endpoint = API_CONFIG.PEDIDOS;
 
   constructor(private api: ApiService) {}
 

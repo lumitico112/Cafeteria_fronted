@@ -3,17 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { UsuarioCreate } from '../models/usuario.model';
-
-export interface AuthResponse {
-  token: string;
-}
+import { LoginRequest, RegisterRequest, AuthenticationResponse } from '../models/auth.models';
+import { API_CONFIG } from '../constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = '/api';
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -28,16 +24,15 @@ export class AuthService {
   ) {
     // Cargar usuario desde localStorage al iniciar solo en el navegador
     if (isPlatformBrowser(this.platformId)) {
-      const token = this.getToken();
+      const token = localStorage.getItem('jwt_token');
       if (token) {
         this.loadUserFromToken(token);
       }
     }
   }
 
-  login(correo: string, contrasena: string): Observable<AuthResponse> {
-    const payload = { email: correo, password: contrasena };
-    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/login`, payload)
+  login(credentials: LoginRequest): Observable<AuthenticationResponse> {
+    return this.http.post<AuthenticationResponse>(`${API_CONFIG.AUTH}/login`, credentials)
       .pipe(
         tap((response) => {
           if (response.token && isPlatformBrowser(this.platformId)) {
@@ -48,25 +43,8 @@ export class AuthService {
       );
   }
 
-  register(userData: UsuarioCreate): Observable<AuthResponse> {
-    const payload = {
-      firstname: userData.nombre,
-      lastname: userData.apellido,
-      email: userData.correo,
-      password: userData.contrasena,
-      idRol: userData.idRol,
-      telefono: userData.telefono,
-      direccion: userData.direccion
-    };
-    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/register`, payload)
-      .pipe(
-        tap((response) => {
-          if (response.token && isPlatformBrowser(this.platformId)) {
-            localStorage.setItem('jwt_token', response.token);
-            this.loadUserFromToken(response.token);
-          }
-        })
-      );
+  register(userData: RegisterRequest): Observable<AuthenticationResponse> {
+    return this.http.post<AuthenticationResponse>(`${API_CONFIG.AUTH}/register`, userData);
   }
 
   logout(): void {

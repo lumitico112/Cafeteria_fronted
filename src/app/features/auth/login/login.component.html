@@ -30,12 +30,17 @@
           <label class="form-label fw-bold text-secondary">
             <i class="fas fa-lock me-2"></i>Contraseña
           </label>
-          <input type="password" class="form-control form-control-lg" 
-                 formControlName="contrasena" 
-                 placeholder="••••••••"
-                 [class.is-invalid]="isFieldInvalid('contrasena')">
-          <div class="invalid-feedback" *ngIf="isFieldInvalid('contrasena')">
-            La contraseña es requerida
+          <div class="input-group">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control form-control-lg" 
+                   formControlName="contrasena" 
+                   placeholder="••••••••"
+                   [class.is-invalid]="isFieldInvalid('contrasena')">
+            <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+              <i class="fas" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"></i>
+            </button>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('contrasena')">
+              La contraseña es requerida
+            </div>
           </div>
         </div>
 

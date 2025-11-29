@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { RegisterRequest } from '../../../core/models/auth.models';
+import { ROLES } from '../../../core/constants';
 
 @Component({
   selector: 'app-register',
@@ -26,14 +28,36 @@ export class RegisterComponent {
       apellido: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
       contrasena: ['', [Validators.required, Validators.minLength(6)]],
+      confirmarContrasena: ['', Validators.required],
       telefono: [''],
       direccion: [''],
       idRol: [3] // Por defecto CLIENTE
-    });
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  // Variables para la visibilidad de contraseñas
+  showPassword = false;
+  showConfirmPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('contrasena')?.value === g.get('confirmarContrasena')?.value
+       ? null : { mismatch: true };
   }
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.registerForm.get(fieldName);
+    // Para confirmarContrasena, también verificamos el error de mismatch en el grupo
+    if (fieldName === 'confirmarContrasena') {
+      return (!!(field && field.touched) && this.registerForm.hasError('mismatch'));
+    }
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
@@ -42,19 +66,20 @@ export class RegisterComponent {
       this.isLoading = true;
       this.errorMessage = '';
       
-      this.authService.register(this.registerForm.value).subscribe({
+      const formValue = this.registerForm.value;
+      const registerData: RegisterRequest = {
+        firstname: formValue.nombre,
+        lastname: formValue.apellido,
+        email: formValue.correo,
+        password: formValue.contrasena,
+        phone: formValue.telefono,
+        address: formValue.direccion
+      };
+      
+      this.authService.register(registerData).subscribe({
         next: () => {
-          const user = this.authService.currentUserValue;
-          // Verificar por ID (3) o por nombre ('CLIENTE')
-          const isCliente = (user?.idRol === 3) || 
-                            (user?.nombreRol === 'CLIENTE') || 
-                            (user?.rol?.nombre === 'CLIENTE');
-
-          if (isCliente) {
-            this.router.navigate(['/']);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
+          // Redirigir al login después del registro exitoso
+          this.router.navigate(['/login']);
         },
         error: (err) => {
           this.isLoading = false;

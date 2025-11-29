@@ -26,15 +26,15 @@
           </span>
         </div>
         
-        <p class="text-muted mb-4">{{ producto.nombreCategoria }}</p>
-
-        <h2 class="text-primary fw-bold mb-4">S/ {{ producto.precio | number:'1.2-2' }}</h2>
+        <p class="text-muted mb-4">{{ producto.categoria?.nombre || 'Sin Categoría' }}</p>
 
         <div class="mb-4">
-          <h5 class="fw-bold">Descripción</h5>
-          <p class="text-secondary">{{ producto.descripcion }}</p>
+          <h3 class="text-primary fw-bold mb-3">S/ {{ producto.precio | number:'1.2-2' }}</h3>
+          <p class="lead">{{ producto.descripcion }}</p>
         </div>
 
+        <!-- Inventory info removed as it is not in Producto model anymore -->
+        <!-- 
         <div class="card bg-light border-0 mb-4">
           <div class="card-body">
             <h5 class="fw-bold mb-3">Detalles de Inventario</h5>
@@ -54,6 +54,7 @@
             </div>
           </div>
         </div>
+        -->
 
         <div class="d-flex gap-2">
           <a [routerLink]="['/productos/editar', producto.idProducto]" class="btn btn-warning flex-grow-1">

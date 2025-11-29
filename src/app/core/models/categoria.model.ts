@@ -1,8 +1,7 @@
 export interface Categoria {
   idCategoria: number;
   nombre: string;
-  descripcion: string;
-  estado: 'ACTIVO' | 'INACTIVO';
+  descripcion?: string;
 }
 
 export interface CategoriaCreate {

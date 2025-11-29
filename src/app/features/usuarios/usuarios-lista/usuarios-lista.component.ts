@@ -46,6 +46,11 @@ export class UsuariosListaComponent implements OnInit {
   }
 
   eliminarUsuario(usuario: Usuario) {
+    if (!usuario.idUsuario) {
+      alert('Error: El usuario no tiene ID válido');
+      return;
+    }
+    
     if (confirm(`¿Está seguro de eliminar al usuario ${usuario.nombre}?`)) {
       this.usuariosService.delete(usuario.idUsuario).subscribe({
         next: () => {

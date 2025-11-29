@@ -38,9 +38,27 @@
 
         <div class="mb-3">
           <label class="form-label fw-bold text-secondary">Contraseña</label>
-          <input type="password" class="form-control" formControlName="contrasena" 
-                 [class.is-invalid]="isFieldInvalid('contrasena')">
-          <div class="invalid-feedback">Mínimo 6 caracteres</div>
+          <div class="input-group">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="contrasena" 
+                   [class.is-invalid]="isFieldInvalid('contrasena')">
+            <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+              <i class="fas" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"></i>
+            </button>
+            <div class="invalid-feedback" *ngIf="registerForm.get('contrasena')?.errors?.['minlength']">Mínimo 6 caracteres</div>
+            <div class="invalid-feedback" *ngIf="registerForm.get('contrasena')?.errors?.['required']">Contraseña es requerida</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold text-secondary">Repetir Contraseña</label>
+          <div class="input-group">
+            <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control" formControlName="confirmarContrasena" 
+                   [class.is-invalid]="isFieldInvalid('confirmarContrasena')">
+            <button class="btn btn-outline-secondary" type="button" (click)="toggleConfirmPasswordVisibility()">
+              <i class="fas" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"></i>
+            </button>
+            <div class="invalid-feedback">Las contraseñas no coinciden</div>
+          </div>
         </div>
 
         <div class="mb-3">

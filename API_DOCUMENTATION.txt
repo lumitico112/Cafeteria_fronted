@@ -258,11 +258,12 @@ Content-Type: application/json
 
 Request Body:
 {
-  "nombre": "Juan",
-  "apellido": "Pérez",
-  "correo": "juan@example.com",
-  "contrasena": "password123",
-  "idRol": 3
+  "firstname": "Juan",
+  "lastname": "Perez",
+  "email": "juan.perez@example.com",
+  "password": "password123",
+  "phone": "987654321",
+  "address": "Av. Principal 123"
 }
 
 Response Success (200):

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LoginRequest } from '../../../core/models/auth.models';
+import { ROLES } from '../../../core/constants';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +29,12 @@ export class LoginComponent {
     });
   }
 
+  showPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
   isFieldInvalid(fieldName: string): boolean {
     const field = this.loginForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
@@ -38,17 +46,25 @@ export class LoginComponent {
       this.errorMessage = '';
       
       const { correo, contrasena } = this.loginForm.value;
+      const credentials: LoginRequest = {
+        email: correo,
+        password: contrasena
+      };
       
-      this.authService.login(correo, contrasena).subscribe({
+      this.authService.login(credentials).subscribe({
         next: () => {
           const user = this.authService.currentUserValue;
-          // Verificar por ID (3) o por nombre ('CLIENTE')
-          // El payload del token puede variar, así que comprobamos varias posibilidades
-          const isCliente = (user?.idRol === 3) || 
+          console.log('Usuario logueado:', user); // Para depuración
+
+          // Verificar si es cliente (ID 3 o rol CLIENTE)
+          // Usamos == para permitir comparación flexible (string/number)
+          const isCliente = (user?.idRol == 3) || 
                             (user?.nombreRol === 'CLIENTE') || 
                             (user?.rol?.nombre === 'CLIENTE') ||
                             (user?.authorities?.includes('CLIENTE')) ||
-                            (user?.authorities?.includes('ROLE_CLIENTE'));
+                            (user?.authorities?.includes('ROLE_CLIENTE')) ||
+                            // Verificación adicional por si authorities es array de objetos
+                            (Array.isArray(user?.authorities) && user.authorities.some((a: any) => a.authority === 'ROLE_CLIENTE' || a.authority === 'CLIENTE'));
 
           if (isCliente) {
             this.router.navigate(['/']);

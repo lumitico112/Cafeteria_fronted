@@ -1,16 +1,15 @@
+import { Categoria } from './categoria.model';
+
 export interface Producto {
   idProducto: number;
   nombre: string;
-  descripcion: string;
+  descripcion?: string;
   precio: number;
   impuesto: number;
-  imagenUrl: string;
   estado: 'ACTIVO' | 'INACTIVO';
-  idCategoria: number;
-  nombreCategoria: string;
-  cantidadActual: number;
-  stockMinimo: number;
-  unidadMedida: string;
+  imagenUrl?: string;
+  categoria?: Categoria;
+  idCategoria?: number; // Para formularios
 }
 
 export interface ProductoCreate {
@@ -21,7 +20,4 @@ export interface ProductoCreate {
   imagenUrl: string;
   estado: 'ACTIVO' | 'INACTIVO';
   idCategoria: number;
-  cantidadActual: number;
-  stockMinimo: number;
-  unidadMedida: string;
 }

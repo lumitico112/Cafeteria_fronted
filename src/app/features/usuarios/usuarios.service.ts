@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { Usuario } from '../../core/models/usuario.model';
+import { API_CONFIG } from '../../core/constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuariosService {
-  private endpoint = '/usuario';
+  private endpoint = API_CONFIG.USUARIOS;
 
   constructor(private api: ApiService) {}
 

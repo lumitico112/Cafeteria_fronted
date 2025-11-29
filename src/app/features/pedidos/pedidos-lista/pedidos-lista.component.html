@@ -70,7 +70,7 @@
       <div class="card-body">
         <div class="mb-3">
           <small class="text-muted d-block mb-1">Cliente</small>
-          <h6 class="mb-0"><i class="fas fa-user me-2 text-secondary"></i>{{ pedido.nombreCliente }}</h6>
+          <h6 class="mb-0"><i class="fas fa-user me-2 text-secondary"></i>{{ pedido.usuario.nombre }} {{ pedido.usuario.apellido }}</h6>
         </div>
         
         <div class="row mb-3">
@@ -85,7 +85,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-          <span class="text-muted">{{ pedido.detalles.length }} items</span>
+          <span class="text-muted">{{ pedido.detalles?.length || 0 }} items</span>
           <h5 class="mb-0 text-primary fw-bold">S/ {{ pedido.total | number:'1.2-2' }}</h5>
         </div>
       </div>

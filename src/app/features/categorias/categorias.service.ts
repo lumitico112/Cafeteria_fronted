@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { Categoria, CategoriaCreate } from '../../core/models/categoria.model';
+import { API_CONFIG } from '../../core/constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoriasService {
-  private endpoint = '/categorias';
+  private endpoint = API_CONFIG.CATEGORIAS;
 
   constructor(private api: ApiService) {}
 

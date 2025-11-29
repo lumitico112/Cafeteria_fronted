@@ -59,26 +59,8 @@
             </div>
           </div>
 
-          <!-- Columna Derecha: Inventario e Imagen -->
+          <!-- Columna Derecha: Imagen -->
           <div class="col-md-4">
-            <div class="card bg-light border-0 mb-3">
-              <div class="card-body">
-                <h5 class="card-title mb-3">Inventario Inicial</h5>
-                <div class="mb-3">
-                  <label class="form-label">Cantidad Actual</label>
-                  <input type="number" class="form-control" formControlName="cantidadActual" min="0">
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Stock Mínimo</label>
-                  <input type="number" class="form-control" formControlName="stockMinimo" min="0">
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Unidad de Medida</label>
-                  <input type="text" class="form-control" formControlName="unidadMedida" placeholder="unidad, kg, lt">
-                </div>
-              </div>
-            </div>
-
             <div class="mb-3">
               <label class="form-label fw-bold">Imagen del Producto</label>
               <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">

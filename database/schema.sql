@@ -366,10 +366,15 @@ BEGIN
     -- Obtener el ID del rol CLIENTE
     SELECT id_rol INTO rol_cliente_id FROM rol WHERE nombre = 'CLIENTE' LIMIT 1;
     
-    -- Si el usuario creado tiene rol CLIENTE, crear registro en tabla cliente
+    -- Si el usuario creado tiene rol CLIENTE, crear registro en tabla cliente y perfil_cliente
     IF NEW.id_rol = rol_cliente_id THEN
+        -- Insertar en tabla cliente (legacy/reporting)
         INSERT INTO cliente (nombres, apellidos, email, telefono, direccion, id_usuario)
         VALUES (NEW.nombre, NEW.apellido, NEW.correo, NEW.telefono, NEW.direccion, NEW.id_usuario);
+        
+        -- Insertar en tabla perfil_cliente (usada por la aplicación Java)
+        INSERT INTO perfil_cliente (id_usuario, telefono, direccion, puntos_fidelizacion)
+        VALUES (NEW.id_usuario, NEW.telefono, NEW.direccion, 0);
     END IF;
 END$$
 

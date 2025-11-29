@@ -32,9 +32,6 @@ export class ProductoFormComponent implements OnInit {
       impuesto: [0.18],
       idCategoria: ['', Validators.required],
       estado: ['ACTIVO'],
-      cantidadActual: [0],
-      stockMinimo: [10],
-      unidadMedida: ['unidad'],
       imagenUrl: ['']
     });
   }
@@ -52,7 +49,7 @@ export class ProductoFormComponent implements OnInit {
     this.productosService.getById(id).subscribe({
       next: (producto) => {
         this.productoForm.patchValue(producto);
-        this.previewUrl = producto.imagenUrl;
+        this.previewUrl = producto.imagenUrl || null;
         this.isLoading = false;
       },
       error: () => {
