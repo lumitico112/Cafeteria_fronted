@@ -2,12 +2,13 @@ import { Producto } from './producto.model';
 
 export interface Inventario {
   idInventario: number;
-  producto?: Producto;
-  idProducto?: number;
+  idProducto: number;
+  nombreProducto: string;
   cantidadActual: number;
   stockMinimo: number;
-  unidadMedida?: string;
+  unidadMedida: string;
   fechaActualizacion?: string;
+  estado?: string;
 }
 
 export interface InventarioUpdate {

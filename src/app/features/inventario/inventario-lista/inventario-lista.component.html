@@ -36,10 +36,11 @@
             </tr>
             <tr *ngFor="let item of inventario">
               <td class="ps-4">
-                <div class="fw-bold">{{ item.producto?.nombre }}</div>
+                <div class="fw-bold">{{ item.nombreProducto }}</div>
                 <small class="text-muted">ID: {{ item.idInventario }}</small>
               </td>
-              <td>{{ item.producto?.categoria?.nombre }}</td>
+              <!-- Category removed as it is not in the flat DTO -->
+              <td>-</td> 
               <td class="text-center">
                 <span class="fw-bold fs-5">{{ item.cantidadActual }}</span>
                 <small class="text-muted ms-1">{{ item.unidadMedida || 'unid.' }}</small>
@@ -71,7 +72,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Ajustar Stock: {{ selectedItem?.producto?.nombre }}</h5>
+        <h5 class="modal-title">Ajustar Stock: {{ selectedItem?.nombreProducto }}</h5>
         <button type="button" class="btn-close" (click)="closeModal()"></button>
       </div>
       <div class="modal-body">

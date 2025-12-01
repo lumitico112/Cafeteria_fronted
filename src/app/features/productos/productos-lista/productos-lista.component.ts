@@ -1,7 +1,8 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ProductosService } from '../productos.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Producto } from '../../../core/models/producto.model';
 import { FormsModule } from '@angular/forms';
 import { ProductoFormComponent } from '../producto-form/producto-form.component';
@@ -28,11 +29,17 @@ export class ProductosListaComponent implements OnInit {
   constructor(
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
+    private authService: AuthService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
+      if (this.authService.getRole() === 'CLIENTE') {
+        this.router.navigate(['/catalogo']);
+        return;
+      }
       this.loadProductos();
       this.loadCategorias();
     }
@@ -95,5 +102,11 @@ export class ProductosListaComponent implements OnInit {
   onProductSaved() {
     this.closeModal();
     this.loadProductos();
+  }
+
+  getImageUrl(url: string | undefined): string {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `http://localhost:8080/uploads/${url}`;
   }
 }

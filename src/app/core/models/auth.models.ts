@@ -18,3 +18,19 @@ export interface RegisterRequest {
 export interface AuthenticationResponse {
   token: string;
 }
+
+export interface User {
+  idUsuario?: number;
+  nombre: string;
+  apellido: string;
+  email: string; // o correo
+  correo?: string;
+  telefono?: string;
+  direccion?: string;
+  nombreRol?: string;
+  idRol?: number;
+  sub?: string; // JWT subject
+  authorities?: any[];
+  estado?: string;
+  fechaCreacion?: string;
+}

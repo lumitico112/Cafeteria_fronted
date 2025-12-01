@@ -49,5 +49,6 @@ export const API_CONFIG = {
   PRODUCTOS: 'http://localhost:8080/productos', // Plural
   PEDIDOS: 'http://localhost:8080/pedidos',     // Plural
   CATEGORIAS: 'http://localhost:8080/categorias', // Plural
-  INVENTARIO: 'http://localhost:8080/inventario' // Plural
+  INVENTARIO: 'http://localhost:8080/inventario', // Plural
+  UPLOADS: 'http://localhost:8080/uploads'      // Imágenes estáticas
 };

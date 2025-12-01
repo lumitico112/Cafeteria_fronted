@@ -55,51 +55,21 @@ export class LoginComponent {
       
       this.authService.login(credentials).subscribe({
         next: () => {
-          // Como el token no trae el rol, buscamos el usuario por su correo
-          this.usuariosService.getAll().subscribe({
-            next: (users) => {
-              const currentUser = users.find(u => u.correo === correo);
-              
-              if (currentUser) {
-                // Actualizamos el usuario en el AuthService con la info completa (incluyendo rol)
-                this.authService.setCurrentUser(currentUser);
-                
-                // Ahora sí verificamos el rol
-                const role = this.authService.getRole();
+          // El token ya fue procesado por AuthService
+          const role = this.authService.getRole();
+          const user = this.authService.currentUserValue;
 
-                if (role === 'ADMIN' || role === 'EMPLEADO') {
-                  this.router.navigate(['/dashboard']);
-                } else {
-                  this.router.navigate(['/']);
-                }
-              } else {
-                // Fallback si no encontramos el usuario (raro si hizo login)
-                this.router.navigate(['/']);
-              }
-            },
-            error: (err) => {
-              // Si es 403 (Forbidden), es esperado para clientes que no pueden listar usuarios.
-              // No lo tratamos como un error crítico en consola.
-              if (err.status !== 403) {
-                console.error('Error al obtener detalles del usuario', err);
-              }
-              
-              // Construimos un usuario fallback
-              // Usamos la parte del correo antes del @ como nombre provisional
-              const nombreProvisional = correo.split('@')[0];
-              
-              const fallbackUser = {
-                correo: correo,
-                nombre: nombreProvisional, 
-                idRol: 3, // Asumimos Cliente
-                nombreRol: 'CLIENTE',
-                sub: correo // Para compatibilidad
-              };
-              
-              this.authService.setCurrentUser(fallbackUser);
-              this.router.navigate(['/']); 
-            }
-          });
+          // Si tenemos ID, intentamos cargar datos frescos (opcional, pero bueno para el perfil)
+          if (user && user.idUsuario) {
+             // No bloqueamos la redirección por esto, lo hacemos en background o dejamos que PerfilComponent lo haga
+          }
+
+          if (role === 'ADMIN' || role === 'EMPLEADO') {
+            this.router.navigate(['/dashboard']);
+          } else {
+            // Asumimos CLIENTE por defecto o si es explícito
+            this.router.navigate(['/catalogo']);
+          }
         },
         error: (err) => {
           this.isLoading = false;

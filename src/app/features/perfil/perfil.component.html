@@ -1,0 +1,97 @@
+<div class="container py-5 fade-in">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h4 class="mb-0 fw-bold text-coffee-dark">
+            <i class="fas fa-user-circle me-2"></i>Mi Perfil
+          </h4>
+          <span class="badge bg-secondary" *ngIf="currentUser?.nombreRol === 'ADMIN' || currentUser?.nombreRol === 'EMPLEADO'">
+            {{ currentUser?.nombreRol }}
+          </span>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-muted">Nombre</label>
+                <input type="text" class="form-control bg-light" formControlName="nombre">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted">Apellido</label>
+                <input type="text" class="form-control bg-light" formControlName="apellido">
+              </div>
+              <div class="col-12">
+                <label class="form-label text-muted">Correo Electrónico</label>
+                <input type="email" class="form-control bg-light" formControlName="correo">
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" formControlName="telefono" placeholder="999999999">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Dirección</label>
+                <input type="text" class="form-control" formControlName="direccion" placeholder="Av. Principal 123">
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+              <button type="button" class="btn btn-outline-secondary" (click)="openPasswordModal()">
+                <i class="fas fa-key me-2"></i>Cambiar Contraseña
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cambio de Contraseña -->
+<div class="modal fade show" [class.d-block]="showPasswordModal" tabindex="-1" *ngIf="showPasswordModal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cambiar Contraseña</h5>
+        <button type="button" class="btn-close" (click)="closePasswordModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+          <div class="mb-3">
+            <label class="form-label">Nueva Contraseña</label>
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="newPassword">
+              <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword">
+                <i class="fas" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"></i>
+              </button>
+            </div>
+            <div *ngIf="passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.errors?.['minlength']" class="text-danger small mt-1">
+              Mínimo 6 caracteres.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Repetir Contraseña</label>
+            <div class="input-group">
+              <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control" formControlName="confirmPassword">
+              <button class="btn btn-outline-secondary" type="button" (click)="showConfirmPassword = !showConfirmPassword">
+                <i class="fas" [class.fa-eye]="showConfirmPassword" [class.fa-eye-slash]="!showConfirmPassword"></i>
+              </button>
+            </div>
+            <div *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched" class="text-danger small mt-1">
+              Las contraseñas no coinciden.
+            </div>
+          </div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">Actualizar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

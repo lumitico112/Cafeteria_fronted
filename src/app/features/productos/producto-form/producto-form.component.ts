@@ -72,7 +72,7 @@ export class ProductoFormComponent implements OnInit {
     this.productosService.getById(id).subscribe({
       next: (producto) => {
         this.productoForm.patchValue(producto);
-        this.previewUrl = producto.imagenUrl || null;
+        this.previewUrl = this.getImageUrl(producto.imagenUrl);
         this.isLoading = false;
       },
       error: () => {
@@ -81,6 +81,12 @@ export class ProductoFormComponent implements OnInit {
         else this.onCancel.emit();
       }
     });
+  }
+
+  getImageUrl(url: string | undefined | null): string | null {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `http://localhost:8080/uploads/${url}`;
   }
 
   isFieldInvalid(fieldName: string): boolean {

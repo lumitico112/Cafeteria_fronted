@@ -34,6 +34,21 @@ export const routes: Routes = [
           .then(m => m.DashboardComponent)
       },
       { 
+        path: 'catalogo', 
+        loadComponent: () => import('./features/cliente/catalogo/catalogo.component')
+          .then(m => m.CatalogoComponent)
+      },
+      { 
+        path: 'carrito', 
+        loadComponent: () => import('./features/cliente/carrito/carrito.component')
+          .then(m => m.CarritoComponent)
+      },
+      { 
+        path: 'perfil', 
+        loadComponent: () => import('./features/perfil/perfil.component')
+          .then(m => m.PerfilComponent)
+      },
+      { 
         path: 'productos', 
         loadComponent: () => import('./features/productos/productos-lista/productos-lista.component')
           .then(m => m.ProductosListaComponent)

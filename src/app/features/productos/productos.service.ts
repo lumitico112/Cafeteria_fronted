@@ -42,6 +42,6 @@ export class ProductosService {
     // Usamos HttpClient directo en ApiService si fuera necesario para multipart,
     // pero aquí asumimos que ApiService puede manejarlo o lo extendemos.
     // Por simplicidad, asumimos que ApiService.post acepta FormData.
-    return this.api.post('/files/upload', formData);
+    return this.api.post(`${API_CONFIG.BASE_URL}/files/upload`, formData);
   }
 }
