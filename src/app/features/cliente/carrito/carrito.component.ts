@@ -137,10 +137,18 @@ export class CarritoComponent implements OnInit {
       formattedPickupTime = `${year}-${month}-${day}T${this.pickupTime}:00`;
     }
 
+    // Workaround: Backend doesn't have clientName field, so we store it in address for non-delivery orders
+    let addressToSend = this.deliveryAddress;
+    if (this.deliveryType !== 'DELIVERY') {
+      addressToSend = finalClientName || (user.nombre + ' ' + user.apellido);
+    }
+
     const pedido: PedidoCreate = {
-      idUsuario: user.idUsuario, // If Employee, this is Employee's ID (acting as creator)
+      idUsuario: user.idUsuario, // Account holder
+      idAtendidoPor: this.isAdminOrEmployee ? user.idUsuario : undefined, // Employee/Admin ID
+      nombreCliente: finalClientName,
       tipoEntrega: this.deliveryType,
-      direccionEntrega: this.deliveryType === 'DELIVERY' ? this.deliveryAddress : undefined,
+      direccionEntrega: addressToSend,
       fechaRecojo: formattedPickupTime,
       detalles: this.cartItems.map(item => ({
         idProducto: item.producto.idProducto,

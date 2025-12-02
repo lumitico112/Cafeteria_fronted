@@ -95,7 +95,16 @@ export class ProductosListaComponent implements OnInit {
           this.notificationService.success('Producto eliminado correctamente');
           this.loadProductos(); // Recargar lista
         },
-        error: (err) => this.notificationService.error('Error al eliminar producto')
+        error: (err) => {
+          console.error('Error deleting product', err);
+          if (err.status === 409) {
+            this.notificationService.warning(
+              'No se puede eliminar este producto porque tiene pedidos o registros asociados. Le sugerimos cambiar su estado a "Inactivo" para que deje de aparecer en el catálogo.'
+            );
+          } else {
+            this.notificationService.error('Error al eliminar producto');
+          }
+        }
       });
     }
   }

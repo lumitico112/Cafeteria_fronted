@@ -65,7 +65,14 @@
         <div class="card-body">
           <div class="mb-3">
             <small class="text-muted d-block">Cliente</small>
-            <strong>{{ pedido.nombreCliente || 'Cliente' }}</strong>
+            <strong>
+              {{ 
+                pedido.nombreCliente || 
+                (pedido.tipoEntrega !== 'DELIVERY' && pedido.direccionEntrega ? pedido.direccionEntrega : 
+                  (pedido.usuario ? (pedido.usuario.nombre + ' ' + pedido.usuario.apellido) : 'Cliente')
+                ) 
+              }}
+            </strong>
           </div>
           <div class="mb-3">
             <small class="text-muted d-block">Fecha de Pedido</small>

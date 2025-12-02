@@ -32,6 +32,8 @@ export interface Pedido {
 
 export interface PedidoCreate {
   idUsuario: number;
+  idAtendidoPor?: number;
+  nombreCliente?: string;
   tipoEntrega: 'DELIVERY' | 'RETIRO' | 'LOCAL';
   direccionEntrega?: string;
   fechaRecojo?: string;
