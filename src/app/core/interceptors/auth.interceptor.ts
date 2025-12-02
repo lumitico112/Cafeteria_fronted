@@ -32,9 +32,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        console.error('Interceptor: 401 Unauthorized detected for', req.url);
-        // Token expirado o inválido
+      if (error.status === 401 || error.status === 403) {
+        console.error(`Interceptor: ${error.status} error detected for`, req.url);
+        // Token expirado, inválido o sin permisos suficientes -> Logout forzado
         if (isPlatformBrowser(platformId)) {
           localStorage.removeItem('jwt_token');
           localStorage.removeItem('user_data');

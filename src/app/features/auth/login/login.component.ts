@@ -68,7 +68,7 @@ export class LoginComponent {
             this.router.navigate(['/dashboard']);
           } else {
             // Asumimos CLIENTE por defecto o si es explícito
-            this.router.navigate(['/catalogo']);
+            this.router.navigate(['/']);
           }
         },
         error: (err) => {

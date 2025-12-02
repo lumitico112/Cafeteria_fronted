@@ -20,8 +20,8 @@ export class PedidosService {
     return this.api.get<Pedido>(`${this.endpoint}/${id}`);
   }
 
-  getByUsuario(idUsuario: number): Observable<Pedido[]> {
-    return this.api.get<Pedido[]>(`${this.endpoint}/usuario/${idUsuario}`);
+  misPedidos(): Observable<Pedido[]> {
+    return this.api.get<Pedido[]>(`${this.endpoint}/mis-pedidos`);
   }
 
   getByEstado(estado: string): Observable<Pedido[]> {
@@ -33,6 +33,6 @@ export class PedidosService {
   }
 
   updateEstado(id: number, estado: string): Observable<Pedido> {
-    return this.api.put<Pedido>(`${this.endpoint}/${id}/estado`, { estado });
+    return this.api.patch<Pedido>(`${this.endpoint}/${id}/estado`, {}, { estado });
   }
 }

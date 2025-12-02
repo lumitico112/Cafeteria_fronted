@@ -34,6 +34,12 @@
         Listos
       </button>
       <button class="btn btn-sm rounded-pill" 
+              [class.btn-info]="selectedEstado === 'EN_CAMINO'"
+              [class.btn-outline-info]="selectedEstado !== 'EN_CAMINO'"
+              (click)="filterByEstado('EN_CAMINO')">
+        En Camino
+      </button>
+      <button class="btn btn-sm rounded-pill" 
               [class.btn-success]="selectedEstado === 'ENTREGADO'"
               [class.btn-outline-success]="selectedEstado !== 'ENTREGADO'"
               (click)="filterByEstado('ENTREGADO')">
@@ -49,7 +55,7 @@
     <div class="card h-100 border-start-4 shadow-sm" 
          [ngClass]="{
            'border-warning': pedido.estado === 'PENDIENTE',
-           'border-info': pedido.estado === 'PREPARACION',
+           'border-info': pedido.estado === 'PREPARACION' || pedido.estado === 'EN_CAMINO',
            'border-primary': pedido.estado === 'LISTO',
            'border-success': pedido.estado === 'ENTREGADO',
            'border-danger': pedido.estado === 'CANCELADO'
@@ -61,6 +67,7 @@
                 'bg-warning text-dark': pedido.estado === 'PENDIENTE',
                 'bg-info text-white': pedido.estado === 'PREPARACION',
                 'bg-primary': pedido.estado === 'LISTO',
+                'bg-info text-dark': pedido.estado === 'EN_CAMINO',
                 'bg-success': pedido.estado === 'ENTREGADO',
                 'bg-danger': pedido.estado === 'CANCELADO'
               }">
@@ -70,7 +77,7 @@
       <div class="card-body">
         <div class="mb-3">
           <small class="text-muted d-block mb-1">Cliente</small>
-          <h6 class="mb-0"><i class="fas fa-user me-2 text-secondary"></i>{{ pedido.usuario.nombre }} {{ pedido.usuario.apellido }}</h6>
+          <h6 class="mb-0"><i class="fas fa-user me-2 text-secondary"></i>{{ pedido.nombreCliente || 'Cliente' }}</h6>
         </div>
         
         <div class="row mb-3">
@@ -95,33 +102,52 @@
             Ver Detalle
           </a>
           
-          <div class="btn-group" *ngIf="pedido.estado !== 'ENTREGADO' && pedido.estado !== 'CANCELADO'">
-            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-              Cambiar Estado
+          <div class="d-flex gap-2" *ngIf="pedido.estado !== 'ENTREGADO' && pedido.estado !== 'CANCELADO'">
+            
+            <!-- Botones de Acción Principal -->
+            <button *ngIf="pedido.estado === 'PENDIENTE'" 
+                    class="btn btn-sm btn-info text-white" 
+                    (click)="updateEstado(pedido, 'PREPARACION')"
+                    title="Iniciar Preparación">
+              <i class="fas fa-fire"></i> Preparar
             </button>
-            <ul class="dropdown-menu">
-              <li *ngIf="pedido.estado === 'PENDIENTE'">
-                <button class="dropdown-item" (click)="updateEstado(pedido, 'PREPARACION')">
-                  <i class="fas fa-fire text-info me-2"></i>Preparar
-                </button>
-              </li>
-              <li *ngIf="pedido.estado === 'PREPARACION'">
-                <button class="dropdown-item" (click)="updateEstado(pedido, 'LISTO')">
-                  <i class="fas fa-check text-primary me-2"></i>Listo
-                </button>
-              </li>
-              <li *ngIf="pedido.estado === 'LISTO'">
-                <button class="dropdown-item" (click)="updateEstado(pedido, 'ENTREGADO')">
-                  <i class="fas fa-box text-success me-2"></i>Entregar
-                </button>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <button class="dropdown-item text-danger" (click)="updateEstado(pedido, 'CANCELADO')">
-                  <i class="fas fa-times me-2"></i>Cancelar
-                </button>
-              </li>
-            </ul>
+
+            <button *ngIf="pedido.estado === 'PREPARACION'" 
+                    class="btn btn-sm btn-primary" 
+                    (click)="updateEstado(pedido, 'LISTO')"
+                    title="Marcar como Listo">
+              <i class="fas fa-check"></i> Listo
+            </button>
+
+            <!-- Flujo Delivery -->
+            <button *ngIf="pedido.estado === 'LISTO' && pedido.tipoEntrega === 'DELIVERY'" 
+                    class="btn btn-sm btn-info text-white" 
+                    (click)="updateEstado(pedido, 'EN_CAMINO')"
+                    title="Enviar Pedido">
+              <i class="fas fa-motorcycle"></i> Enviar
+            </button>
+
+            <!-- Flujo Tienda/Retiro -->
+            <button *ngIf="pedido.estado === 'LISTO' && pedido.tipoEntrega !== 'DELIVERY'" 
+                    class="btn btn-sm btn-success" 
+                    (click)="updateEstado(pedido, 'ENTREGADO')"
+                    title="Entregar Pedido">
+              <i class="fas fa-box"></i> Entregar
+            </button>
+
+            <button *ngIf="pedido.estado === 'EN_CAMINO' && isAdmin" 
+                    class="btn btn-sm btn-success" 
+                    (click)="updateEstado(pedido, 'ENTREGADO')"
+                    title="Confirmar Entrega">
+              <i class="fas fa-check-double"></i> Confirmar
+            </button>
+
+            <!-- Botón Cancelar -->
+            <button class="btn btn-sm btn-outline-danger" 
+                    (click)="updateEstado(pedido, 'CANCELADO')"
+                    title="Cancelar Pedido">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
         </div>
       </div>

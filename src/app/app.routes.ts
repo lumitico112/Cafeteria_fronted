@@ -108,6 +108,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/inventario/inventario-lista/inventario-lista.component').then(m => m.InventarioListaComponent),
         canActivate: [authGuard]
       },
+      {
+        path: 'historial',
+        loadComponent: () => import('./features/cliente/historial-pedidos/historial-pedidos.component').then(m => m.HistorialPedidosComponent),
+        canActivate: [authGuard]
+      }
     ]
   },
   { path: '**', redirectTo: '/' }

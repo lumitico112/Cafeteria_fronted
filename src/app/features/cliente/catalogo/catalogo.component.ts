@@ -1,9 +1,11 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ProductosService } from '../../productos/productos.service';
 import { CategoriasService } from '../../categorias/categorias.service';
 import { CarritoService } from '../../../core/services/carrito.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Producto } from '../../../core/models/producto.model';
 import { Categoria } from '../../../core/models/categoria.model';
 import { API_CONFIG } from '../../../core/constants';
@@ -24,17 +26,23 @@ export class CatalogoComponent implements OnInit {
   isLoading = true;
   searchTerm = '';
   selectedCategory = '';
+  cartItemCount = 0;
 
   constructor(
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
     private carritoService: CarritoService,
+    private notificationService: NotificationService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.loadData();
+      this.carritoService.cart$.subscribe(items => {
+        this.cartItemCount = items.reduce((acc, item) => acc + item.cantidad, 0);
+      });
     }
   }
 
@@ -45,12 +53,14 @@ export class CatalogoComponent implements OnInit {
       categorias: this.categoriasService.getAll().pipe(
         catchError(err => {
           console.error('Error loading categories', err);
+          this.notificationService.error('Error al cargar categorías');
           return of([]);
         })
       ),
       productos: this.productosService.getAll().pipe(
         catchError(err => {
           console.error('Error loading products', err);
+          this.notificationService.error('Error al cargar productos');
           return of([]);
         })
       )
@@ -80,8 +90,11 @@ export class CatalogoComponent implements OnInit {
 
   addToCart(producto: Producto) {
     this.carritoService.addToCart(producto);
-    // Opcional: Mostrar notificación toast
-    alert('Producto agregado al carrito');
+    this.notificationService.toast(`Agregado: ${producto.nombre}`, 'success');
+  }
+
+  goToCart() {
+    this.router.navigate(['/carrito']);
   }
 
   getImageUrl(url: string | undefined): string {

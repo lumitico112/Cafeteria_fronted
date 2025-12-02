@@ -37,7 +37,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let detalle of pedido.detalles">
-                  <td class="ps-4">{{ detalle.producto.nombre }}</td>
+                  <td class="ps-4">{{ detalle.nombreProducto || detalle.producto?.nombre || 'Producto desconocido' }}</td>
                   <td class="text-center">{{ detalle.cantidad }}</td>
                   <td class="text-end">S/ {{ detalle.precioUnitario | number:'1.2-2' }}</td>
                   <td class="text-end pe-4 fw-bold">S/ {{ detalle.subtotal | number:'1.2-2' }}</td>
@@ -65,7 +65,7 @@
         <div class="card-body">
           <div class="mb-3">
             <small class="text-muted d-block">Cliente</small>
-            <strong>{{ pedido.usuario.nombre }} {{ pedido.usuario.apellido }}</strong>
+            <strong>{{ pedido.nombreCliente || 'Cliente' }}</strong>
           </div>
           <div class="mb-3">
             <small class="text-muted d-block">Fecha de Pedido</small>
@@ -77,7 +77,7 @@
           </div>
           <div *ngIf="pedido.atendidoPor">
             <small class="text-muted d-block">Atendido por</small>
-            <strong>{{ pedido.atendidoPor.nombre }} {{ pedido.atendidoPor.apellido }}</strong>
+            <strong>{{ pedido.nombreEmpleado || 'Personal' }}</strong>
           </div>
         </div>
       </div>

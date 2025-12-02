@@ -1,0 +1,79 @@
+<div class="container py-5 fade-in">
+  <h2 class="mb-4 fw-bold text-coffee-dark">
+    <i class="fas fa-history me-2"></i>Mis Pedidos
+  </h2>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && pedidos.length === 0" class="text-center py-5">
+    <div class="mb-4">
+      <i class="fas fa-receipt fa-4x text-muted opacity-50"></i>
+    </div>
+    <h3 class="text-muted mb-3">No tienes pedidos aún</h3>
+    <a routerLink="/catalogo" class="btn btn-primary">
+      <i class="fas fa-coffee me-2"></i>Ir al Catálogo
+    </a>
+  </div>
+
+  <div *ngIf="!loading && pedidos.length > 0" class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Fecha</th>
+              <th>Entrega</th>
+              <th>Detalle</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pedido of pedidos">
+              <td class="ps-4 fw-bold">#{{ pedido.idPedido }}</td>
+              <td>{{ pedido.fecha | date:'short' }}</td>
+              <td>
+                <span class="badge bg-light text-dark border">
+                  <i class="fas" [ngClass]="pedido.tipoEntrega === 'DELIVERY' ? 'fa-motorcycle' : 'fa-store'"></i>
+                  {{ pedido.tipoEntrega }}
+                </span>
+                <div class="small text-muted mt-1" *ngIf="pedido.tipoEntrega === 'DELIVERY'">
+                  {{ pedido.direccionEntrega }}
+                </div>
+                <div class="small text-muted mt-1" *ngIf="pedido.tipoEntrega === 'RETIRO'">
+                  Hora: {{ pedido.fechaRecojo }}
+                </div>
+              </td>
+              <td>
+                <ul class="list-unstyled mb-0 small">
+                  <li *ngFor="let detalle of pedido.detalles">
+                    {{ detalle.cantidad }}x {{ detalle.nombreProducto || 'Producto desconocido' }}
+                  </li>
+                </ul>
+              </td>
+              <td class="fw-bold">S/ {{ pedido.total | number:'1.2-2' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(pedido.estado)">
+                  {{ pedido.estado }}
+                </span>
+              </td>
+              <td class="text-end pe-4">
+                <button *ngIf="pedido.tipoEntrega === 'DELIVERY' && pedido.estado === 'EN_CAMINO'" 
+                        class="btn btn-sm btn-success" 
+                        (click)="confirmarEntrega(pedido)">
+                  <i class="fas fa-check me-1"></i>Confirmar Entrega
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

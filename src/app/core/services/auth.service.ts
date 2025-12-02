@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { LoginRequest, RegisterRequest, AuthenticationResponse } from '../models/auth.models';
+import { LoginRequest, RegisterRequest, AuthenticationResponse, Modulo } from '../models/auth.models';
 import { API_CONFIG } from '../constants';
 
 @Injectable({
@@ -12,6 +12,9 @@ import { API_CONFIG } from '../constants';
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+
+  private menuSubject = new BehaviorSubject<Modulo[]>([]);
+  public menu$ = this.menuSubject.asObservable();
 
   public get currentUserValue(): any {
     return this.currentUserSubject.value;
@@ -37,6 +40,7 @@ export class AuthService {
         } else {
           this.loadUserFromToken(token);
         }
+        this.loadMenuFromStorage();
       }
     }
   }
@@ -48,6 +52,12 @@ export class AuthService {
           if (response.token && isPlatformBrowser(this.platformId)) {
             localStorage.setItem('jwt_token', response.token);
             
+            // Guardar menú
+            if (response.menu) {
+              localStorage.setItem('menu', JSON.stringify(response.menu));
+              this.menuSubject.next(response.menu);
+            }
+
             // Construir objeto usuario desde la respuesta plana
             const user = {
               idUsuario: response.idUsuario,
@@ -70,12 +80,43 @@ export class AuthService {
   }
 
   logout(): void {
+    // 1. Llamar al backend para invalidar el token
+    this.http.post(`${API_CONFIG.AUTH}/logout`, {}).subscribe({
+      next: () => {
+        console.log('Sesión cerrada en servidor');
+      },
+      error: (err) => {
+        console.warn('Error al notificar logout', err);
+        // Procedemos a borrar localmente de todos modos
+      },
+      complete: () => {
+        this.doLocalLogout();
+      }
+    });
+  }
+
+  doLocalLogout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('user_data');
+      localStorage.removeItem('menu');
     }
     this.currentUserSubject.next(null);
+    this.menuSubject.next([]);
     this.router.navigate(['/login']);
+  }
+
+  loadMenuFromStorage() {
+    if (isPlatformBrowser(this.platformId)) {
+      const menu = localStorage.getItem('menu');
+      if (menu) {
+        try {
+          this.menuSubject.next(JSON.parse(menu));
+        } catch (e) {
+          console.error('Error parsing menu from storage', e);
+        }
+      }
+    }
   }
 
   getToken(): string | null {

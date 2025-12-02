@@ -5,6 +5,8 @@ import { PedidosService } from '../pedidos.service';
 import { Pedido } from '../../../core/models/pedido.model';
 import { FormsModule } from '@angular/forms';
 
+import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-pedidos-lista',
   standalone: true,
@@ -17,10 +19,15 @@ export class PedidosListaComponent implements OnInit {
   filteredPedidos: Pedido[] = [];
   isLoading = true;
   selectedEstado = '';
+  isAdmin = false;
 
-  constructor(private pedidosService: PedidosService) {}
+  constructor(
+    private pedidosService: PedidosService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    this.isAdmin = this.authService.getRole() === 'ADMIN';
     this.loadPedidos();
   }
 

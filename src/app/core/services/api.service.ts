@@ -28,6 +28,18 @@ export class ApiService {
     return this.http.put<T>(endpoint, data);
   }
 
+  patch<T>(endpoint: string, data: any, params?: any): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined) {
+          httpParams = httpParams.set(key, params[key]);
+        }
+      });
+    }
+    return this.http.patch<T>(endpoint, data, { params: httpParams });
+  }
+
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(endpoint);
   }

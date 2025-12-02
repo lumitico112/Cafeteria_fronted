@@ -15,6 +15,14 @@ export interface RegisterRequest {
 }
 
 // Respuesta del Backend
+export interface Modulo {
+  id: number;
+  nombre: string;
+  basePath: string;
+  label: string;
+  icon: string;
+}
+
 export interface AuthenticationResponse {
   token: string;
   idUsuario: number;
@@ -22,6 +30,7 @@ export interface AuthenticationResponse {
   apellido: string;
   email: string;
   rol: string;
+  menu: Modulo[];
 }
 
 export interface User {
