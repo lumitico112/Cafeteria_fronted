@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductosService } from '../productos.service';
 import { CategoriasService } from '../../categorias/categorias.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Categoria } from '../../../core/models/categoria.model';
 
 @Component({
@@ -30,6 +31,7 @@ export class ProductoFormComponent implements OnInit {
     private fb: FormBuilder,
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
+    private notificationService: NotificationService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -63,6 +65,7 @@ export class ProductoFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar categorías', err);
+        this.notificationService.error('Error al cargar categorías');
       }
     });
   }
@@ -76,7 +79,7 @@ export class ProductoFormComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
-        alert('Error al cargar producto');
+        this.notificationService.error('Error al cargar producto');
         if (!this.isModal) this.router.navigate(['/productos']);
         else this.onCancel.emit();
       }
@@ -129,7 +132,7 @@ export class ProductoFormComponent implements OnInit {
             this.saveProduct();
           },
           error: () => {
-            alert('Error al subir imagen');
+            this.notificationService.error('Error al subir imagen');
             this.isLoading = false;
           }
         });
@@ -138,6 +141,7 @@ export class ProductoFormComponent implements OnInit {
       }
     } else {
       this.productoForm.markAllAsTouched();
+      this.notificationService.info('Por favor complete los campos requeridos');
     }
   }
 
@@ -150,6 +154,9 @@ export class ProductoFormComponent implements OnInit {
 
     request.subscribe({
       next: () => {
+        this.notificationService.success(
+          this.isEditing ? 'Producto actualizado correctamente' : 'Producto creado correctamente'
+        );
         if (this.isModal) {
           this.onSave.emit();
           this.productoForm.reset(); // Reset form for next use
@@ -161,7 +168,8 @@ export class ProductoFormComponent implements OnInit {
         }
       },
       error: (err) => {
-        alert('Error al guardar producto');
+        console.error('Error saving product', err);
+        this.notificationService.error('Error al guardar producto');
         this.isLoading = false;
       }
     });

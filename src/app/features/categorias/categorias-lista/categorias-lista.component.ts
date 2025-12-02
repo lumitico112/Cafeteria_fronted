@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CategoriasService } from '../categorias.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Categoria } from '../../../core/models/categoria.model';
 import { CategoriaFormComponent } from '../categoria-form/categoria-form.component';
 
@@ -17,7 +18,10 @@ export class CategoriasListaComponent implements OnInit {
   isLoading = true;
   showModal = false;
 
-  constructor(private categoriasService: CategoriasService) {}
+  constructor(
+    private categoriasService: CategoriasService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit() {
     this.loadCategorias();
@@ -30,15 +34,30 @@ export class CategoriasListaComponent implements OnInit {
         this.categorias = data;
         this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: (err) => {
+        console.error('Error loading categories', err);
+        this.notificationService.error('Error al cargar categorías');
+        this.isLoading = false;
+      }
     });
   }
 
-  deleteCategoria(cat: Categoria) {
-    if (confirm(`¿Está seguro de eliminar la categoría "${cat.nombre}"?`)) {
+  async deleteCategoria(cat: Categoria) {
+    const confirmed = await this.notificationService.confirm(
+      `¿Está seguro de eliminar la categoría "${cat.nombre}"?`,
+      'Sí, eliminar'
+    );
+
+    if (confirmed) {
       this.categoriasService.delete(cat.idCategoria).subscribe({
-        next: () => this.loadCategorias(),
-        error: () => alert('Error al eliminar categoría')
+        next: () => {
+          this.notificationService.success('Categoría eliminada correctamente');
+          this.loadCategorias();
+        },
+        error: (err) => {
+          console.error('Error deleting category', err);
+          this.notificationService.error('Error al eliminar categoría');
+        }
       });
     }
   }

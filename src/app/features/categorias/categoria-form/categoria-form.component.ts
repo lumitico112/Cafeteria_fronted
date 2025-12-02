@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CategoriasService } from '../categorias.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-categoria-form',
@@ -24,6 +25,7 @@ export class CategoriaFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private categoriasService: CategoriasService,
+    private notificationService: NotificationService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -52,7 +54,7 @@ export class CategoriaFormComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
-        alert('Error al cargar categoría');
+        this.notificationService.error('Error al cargar categoría');
         if (!this.isModal) this.router.navigate(['/categorias']);
         else this.onCancel.emit();
       }
@@ -75,21 +77,25 @@ export class CategoriaFormComponent implements OnInit {
 
       request.subscribe({
         next: () => {
+          this.notificationService.success(
+            this.isEditing ? 'Categoría actualizada correctamente' : 'Categoría creada correctamente'
+          );
           if (this.isModal) {
             this.onSave.emit();
-            this.categoriaForm.reset();
+            this.categoriaForm.reset({ estado: 'ACTIVO' });
             this.isLoading = false;
           } else {
             this.router.navigate(['/categorias']);
           }
         },
         error: () => {
-          alert('Error al guardar categoría');
+          this.notificationService.error('Error al guardar categoría');
           this.isLoading = false;
         }
       });
     } else {
       this.categoriaForm.markAllAsTouched();
+      this.notificationService.info('Por favor complete los campos requeridos');
     }
   }
 

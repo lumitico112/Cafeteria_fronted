@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuariosService } from '../usuarios/usuarios.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { User } from '../../core/models/auth.models';
 
 @Component({
@@ -24,6 +25,7 @@ export class PerfilComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private usuariosService: UsuariosService,
+    private notificationService: NotificationService,
     private fb: FormBuilder
   ) {
     this.profileForm = this.fb.group({
@@ -99,12 +101,12 @@ export class PerfilComponent implements OnInit {
       this.usuariosService.update(this.currentUser.idUsuario!, updatedData).subscribe({
         next: (user) => {
           this.authService.setCurrentUser(user);
-          alert('Perfil actualizado correctamente');
+          this.notificationService.success('Perfil actualizado correctamente');
           this.isLoading = false;
         },
         error: (err) => {
           console.error('Error updating profile', err);
-          alert('Error al actualizar perfil');
+          this.notificationService.error('Error al actualizar perfil');
           this.isLoading = false;
         }
       });
@@ -124,7 +126,7 @@ export class PerfilComponent implements OnInit {
     if (this.passwordForm.valid && this.currentUser) {
       // Aquí iría la llamada al servicio para cambiar contraseña
       // Por ahora simulamos éxito
-      alert('Contraseña actualizada correctamente');
+      this.notificationService.success('Contraseña actualizada correctamente');
       this.closePasswordModal();
     }
   }

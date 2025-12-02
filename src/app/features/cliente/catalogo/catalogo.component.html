@@ -46,11 +46,17 @@
     <div class="col-sm-6 col-lg-4 col-xl-3" *ngFor="let producto of filteredProductos">
       <div class="card product-card h-100 border-0 shadow-sm">
         <div class="product-image-wrapper position-relative overflow-hidden">
-          <img *ngIf="producto.imagenUrl" [src]="getImageUrl(producto.imagenUrl)" [alt]="producto.nombre" class="card-img-top product-img">
-          <div *ngIf="!producto.imagenUrl" class="card-img-top product-img d-flex align-items-center justify-content-center bg-light">
+          <img *ngIf="producto.imagenUrl" [src]="getImageUrl(producto.imagenUrl)" [alt]="producto.nombre" class="card-img-top product-img" [class.opacity-50]="getStock(producto.idProducto) === 0">
+          <div *ngIf="!producto.imagenUrl" class="card-img-top product-img d-flex align-items-center justify-content-center bg-light" [class.opacity-50]="getStock(producto.idProducto) === 0">
             <i class="fas fa-coffee fa-3x text-muted"></i>
           </div>
-          <div class="product-overlay d-flex align-items-center justify-content-center">
+          
+          <!-- Badge Agotado -->
+          <div class="position-absolute top-0 end-0 p-2" *ngIf="getStock(producto.idProducto) === 0">
+            <span class="badge bg-danger shadow">AGOTADO</span>
+          </div>
+
+          <div class="product-overlay d-flex align-items-center justify-content-center" *ngIf="getStock(producto.idProducto) > 0">
             <button class="btn btn-light rounded-circle shadow me-2" (click)="addToCart(producto)" title="Agregar al carrito">
               <i class="fas fa-cart-plus text-primary"></i>
             </button>
@@ -62,11 +68,18 @@
           <p class="text-muted small mb-2">{{ producto.categoria?.nombre }}</p>
           <p class="card-text text-truncate-2 small text-muted mb-3">{{ producto.descripcion }}</p>
           <h4 class="text-primary fw-bold mb-0">S/ {{ producto.precio | number:'1.2-2' }}</h4>
+          <small class="text-muted" *ngIf="getStock(producto.idProducto) > 0 && getStock(producto.idProducto) <= 5">
+            ¡Solo quedan {{ getStock(producto.idProducto) }}!
+          </small>
         </div>
         
         <div class="card-footer bg-transparent border-0 pb-3 pt-0">
-          <button class="btn btn-outline-primary w-100 rounded-pill" (click)="addToCart(producto)">
-            Agregar
+          <button class="btn w-100 rounded-pill" 
+                  [class.btn-outline-primary]="getStock(producto.idProducto) > 0"
+                  [class.btn-secondary]="getStock(producto.idProducto) === 0"
+                  [disabled]="getStock(producto.idProducto) === 0"
+                  (click)="addToCart(producto)">
+            {{ getStock(producto.idProducto) === 0 ? 'Agotado' : 'Agregar' }}
           </button>
         </div>
       </div>

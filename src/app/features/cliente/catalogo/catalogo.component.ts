@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProductosService } from '../../productos/productos.service';
 import { CategoriasService } from '../../categorias/categorias.service';
+import { InventarioService } from '../../inventario/inventario.service';
 import { CarritoService } from '../../../core/services/carrito.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Producto } from '../../../core/models/producto.model';
 import { Categoria } from '../../../core/models/categoria.model';
+import { Inventario } from '../../../core/models/inventario.model';
 import { API_CONFIG } from '../../../core/constants';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -23,14 +25,17 @@ export class CatalogoComponent implements OnInit {
   productos: Producto[] = [];
   filteredProductos: Producto[] = [];
   categorias: Categoria[] = [];
+  inventario: Inventario[] = [];
   isLoading = true;
   searchTerm = '';
   selectedCategory = '';
+  inventoryError = false;
   cartItemCount = 0;
 
   constructor(
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
+    private inventarioService: InventarioService,
     private carritoService: CarritoService,
     private notificationService: NotificationService,
     private router: Router,
@@ -48,6 +53,7 @@ export class CatalogoComponent implements OnInit {
 
   loadData() {
     this.isLoading = true;
+    this.inventoryError = false;
     
     forkJoin({
       categorias: this.categoriasService.getAll().pipe(
@@ -63,11 +69,19 @@ export class CatalogoComponent implements OnInit {
           this.notificationService.error('Error al cargar productos');
           return of([]);
         })
+      ),
+      inventario: this.inventarioService.getAll().pipe(
+        catchError(err => {
+          console.error('Error loading inventory', err);
+          this.inventoryError = true;
+          return of([]);
+        })
       )
     }).subscribe({
       next: (results) => {
         this.categorias = results.categorias;
         this.productos = results.productos;
+        this.inventario = results.inventario;
         this.filteredProductos = results.productos;
         this.isLoading = false;
       },
@@ -88,7 +102,20 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
+  getStock(productoId: number): number {
+    // Si hubo error al cargar inventario, asumimos que hay stock para no bloquear ventas
+    if (this.inventoryError) return 99;
+    
+    const item = this.inventario.find(i => i.idProducto === productoId);
+    return item ? item.cantidadActual : 0;
+  }
+
   addToCart(producto: Producto) {
+    const stock = this.getStock(producto.idProducto);
+    if (stock <= 0) {
+      this.notificationService.warning('Producto agotado');
+      return;
+    }
     this.carritoService.addToCart(producto);
     this.notificationService.toast(`Agregado: ${producto.nombre}`, 'success');
   }

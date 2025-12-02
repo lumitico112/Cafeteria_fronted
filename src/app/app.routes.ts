@@ -23,6 +23,12 @@ export const routes: Routes = [
       .then(m => m.LogoutComponent)
   },
   {
+    path: 'welcome',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/auth/welcome/welcome.component')
+      .then(m => m.WelcomeComponent)
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./shared/layout/main-layout/main-layout.component')

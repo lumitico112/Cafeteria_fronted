@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { RegisterRequest } from '../../../core/models/auth.models';
 import { ROLES } from '../../../core/constants';
 
@@ -21,6 +22,7 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private notificationService: NotificationService,
     private router: Router
   ) {
     this.registerForm = this.fb.group({
@@ -78,16 +80,27 @@ export class RegisterComponent {
       
       this.authService.register(registerData).subscribe({
         next: () => {
-          // Redirigir al login después del registro exitoso
+          this.isLoading = false;
+          this.notificationService.success('¡Registro Exitoso!', 'Ahora puedes iniciar sesión.');
           this.router.navigate(['/login']);
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.error?.message || 'Error al registrarse. Intente nuevamente.';
+          console.error('Registration error', err);
+          
+          if (err.status === 409) {
+            // Error de duplicado
+            this.notificationService.warning('Usuario Existente', 'Este correo electrónico ya está registrado.');
+          } else {
+            const msg = err.error?.message || 'No se pudo completar el registro.';
+            this.notificationService.error('Error', msg);
+            this.errorMessage = msg; // Keep showing in UI text if needed, or remove
+          }
         }
       });
     } else {
       this.registerForm.markAllAsTouched();
+      this.notificationService.info('Por favor complete todos los campos requeridos');
     }
   }
 }

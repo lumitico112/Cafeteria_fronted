@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CarritoService } from '../../../core/services/carrito.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Observable } from 'rxjs';
 import { User } from '../../../core/models/auth.models';
 
@@ -20,6 +21,7 @@ export class NavbarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private carritoService: CarritoService,
+    private notificationService: NotificationService,
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;
@@ -33,10 +35,17 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit() {}
 
-  logout(event: Event) {
+  async logout(event: Event) {
     event.preventDefault();
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    const confirmed = await this.notificationService.confirm(
+      '¿Estás seguro que deseas cerrar sesión?',
+      'Sí, cerrar sesión'
+    );
+    
+    if (confirmed) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
   }
 
   get isAdminOrEmployee(): boolean {

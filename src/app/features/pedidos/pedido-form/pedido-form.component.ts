@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { PedidosService } from '../pedidos.service';
 import { ProductosService } from '../../productos/productos.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Producto } from '../../../core/models/producto.model';
 import { PedidoCreate } from '../../../core/models/pedido.model';
 
@@ -28,6 +29,7 @@ export class PedidoFormComponent implements OnInit {
     private pedidosService: PedidosService,
     private productosService: ProductosService,
     private authService: AuthService,
+    private notificationService: NotificationService,
     private router: Router
   ) {
     this.pedidoForm = this.fb.group({
@@ -61,7 +63,7 @@ export class PedidoFormComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
-        alert('Error al cargar productos');
+        this.notificationService.error('Error al cargar productos');
         this.isLoading = false;
       }
     });
@@ -144,17 +146,18 @@ export class PedidoFormComponent implements OnInit {
 
       this.pedidosService.create(newPedido).subscribe({
         next: () => {
-          alert('Pedido creado exitosamente');
+          this.notificationService.success('Pedido creado exitosamente');
           this.router.navigate(['/pedidos']);
         },
         error: (err) => {
           console.error(err);
-          alert('Error al crear el pedido');
+          this.notificationService.error('Error al crear el pedido');
           this.isSaving = false;
         }
       });
     } else {
       this.pedidoForm.markAllAsTouched();
+      this.notificationService.info('Por favor complete todos los campos requeridos');
     }
   }
 }

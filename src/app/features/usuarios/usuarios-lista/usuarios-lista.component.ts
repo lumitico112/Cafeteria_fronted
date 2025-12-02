@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { UsuariosService } from '../usuarios.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Usuario } from '../../../core/models/usuario.model';
 import { UsuarioFormComponent } from '../usuario-form/usuario-form.component';
 
@@ -23,6 +24,7 @@ export class UsuariosListaComponent implements OnInit {
 
   constructor(
     private usuariosService: UsuariosService,
+    private notificationService: NotificationService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -45,6 +47,7 @@ export class UsuariosListaComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar usuarios', err);
+        this.notificationService.error('Error al cargar usuarios');
         this.isLoading = false;
       }
     });
@@ -90,26 +93,35 @@ export class UsuariosListaComponent implements OnInit {
     const usuarioActualizado = { ...usuario, estado: nuevoEstado };
     
     this.usuariosService.update(usuario.idUsuario, usuarioActualizado).subscribe({
+      next: () => {
+        this.notificationService.toast(`Usuario ${nuevoEstado === 'ACTIVO' ? 'activado' : 'desactivado'}`, 'success');
+      },
       error: (err) => {
         console.error('Error al actualizar estado', err);
         // Revertir cambios si falla
         usuario.estado = estadoOriginal;
-        alert('Error al actualizar el estado del usuario');
+        this.notificationService.error('Error al actualizar el estado del usuario');
       }
     });
   }
 
-  eliminarUsuario(usuario: Usuario) {
+  async eliminarUsuario(usuario: Usuario) {
     if (!usuario.idUsuario) return;
     
-    if (confirm(`¿Está seguro de eliminar al usuario ${usuario.nombre}?`)) {
+    const confirmed = await this.notificationService.confirm(
+      `¿Está seguro de eliminar al usuario ${usuario.nombre}?`,
+      'Sí, eliminar'
+    );
+
+    if (confirmed) {
       this.usuariosService.delete(usuario.idUsuario).subscribe({
         next: () => {
+          this.notificationService.success('Usuario eliminado correctamente');
           this.cargarUsuarios();
         },
         error: (err) => {
           console.error('Error al eliminar usuario', err);
-          alert('Error al eliminar usuario');
+          this.notificationService.error('Error al eliminar usuario');
         }
       });
     }

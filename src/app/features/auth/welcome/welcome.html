@@ -1,0 +1,30 @@
+<div class="welcome-container d-flex align-items-center justify-content-center vh-100 bg-light">
+  <div class="text-center fade-in">
+    <div class="mb-4">
+      <i class="fas fa-coffee fa-4x text-primary mb-3"></i>
+      <h1 class="display-4 fw-bold text-dark">¡Bienvenido!</h1>
+      <h2 class="h3 text-muted mb-4">{{ userName }}</h2>
+    </div>
+
+    <div class="loader-container mb-4">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <p class="lead text-secondary">{{ loadingMessage }}</p>
+  </div>
+</div>
+
+<style>
+  .welcome-container {
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  }
+  .fade-in {
+    animation: fadeIn 1s ease-in;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

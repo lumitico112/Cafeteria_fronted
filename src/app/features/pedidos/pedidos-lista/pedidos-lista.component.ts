@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PedidosService } from '../pedidos.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Pedido } from '../../../core/models/pedido.model';
 import { FormsModule } from '@angular/forms';
 
@@ -23,7 +24,8 @@ export class PedidosListaComponent implements OnInit {
 
   constructor(
     private pedidosService: PedidosService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -39,7 +41,11 @@ export class PedidosListaComponent implements OnInit {
         this.filterByEstado(this.selectedEstado);
         this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: (err) => {
+        console.error('Error loading orders', err);
+        this.notificationService.error('Error al cargar pedidos');
+        this.isLoading = false;
+      }
     });
   }
 
@@ -52,11 +58,22 @@ export class PedidosListaComponent implements OnInit {
     }
   }
 
-  updateEstado(pedido: Pedido, nuevoEstado: string) {
-    if (confirm(`¿Cambiar estado del pedido #${pedido.idPedido} a ${nuevoEstado}?`)) {
+  async updateEstado(pedido: Pedido, nuevoEstado: string) {
+    const confirmed = await this.notificationService.confirm(
+      `¿Cambiar estado del pedido #${pedido.idPedido} a ${nuevoEstado}?`,
+      'Sí, cambiar'
+    );
+
+    if (confirmed) {
       this.pedidosService.updateEstado(pedido.idPedido, nuevoEstado).subscribe({
-        next: () => this.loadPedidos(),
-        error: () => alert('Error al actualizar estado')
+        next: () => {
+          this.notificationService.success(`Estado actualizado a ${nuevoEstado}`);
+          this.loadPedidos();
+        },
+        error: (err) => {
+          console.error('Error updating order status', err);
+          this.notificationService.error('Error al actualizar estado');
+        }
       });
     }
   }

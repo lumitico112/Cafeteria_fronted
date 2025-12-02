@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { UsuariosService } from '../usuarios.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { ROLES } from '../../../core/constants';
 
 @Component({
@@ -31,6 +32,7 @@ export class UsuarioFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private usuariosService: UsuariosService,
+    private notificationService: NotificationService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -74,7 +76,7 @@ export class UsuarioFormComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
-        alert('Error al cargar usuario');
+        this.notificationService.error('Error al cargar usuario');
         if (!this.isModal) this.router.navigate(['/usuarios']);
         else this.onCancel.emit();
       }
@@ -107,6 +109,9 @@ export class UsuarioFormComponent implements OnInit {
 
       request.subscribe({
         next: () => {
+          this.notificationService.success(
+            this.isEditing ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente'
+          );
           if (this.isModal) {
             this.onSave.emit();
             this.usuarioForm.reset({ idRol: ROLES.EMPLEADO, estado: 'ACTIVO' });
@@ -115,13 +120,19 @@ export class UsuarioFormComponent implements OnInit {
             this.router.navigate(['/usuarios']);
           }
         },
-        error: () => {
-          alert('Error al guardar usuario');
+        error: (err) => {
+          console.error('Error saving user', err);
+          if (err.status === 409) {
+             this.notificationService.warning('El correo electrónico ya está registrado');
+          } else {
+             this.notificationService.error('Error al guardar usuario');
+          }
           this.isLoading = false;
         }
       });
     } else {
       this.usuarioForm.markAllAsTouched();
+      this.notificationService.info('Por favor complete los campos requeridos');
     }
   }
 

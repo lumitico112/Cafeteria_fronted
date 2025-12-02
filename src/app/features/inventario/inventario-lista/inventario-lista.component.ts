@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventarioService } from '../inventario.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Inventario } from '../../../core/models/inventario.model';
 
 @Component({
@@ -26,7 +27,10 @@ export class InventarioListaComponent implements OnInit {
   editCantidad: number = 0;
   editStockMinimo: number = 0;
 
-  constructor(private inventarioService: InventarioService) {}
+  constructor(
+    private inventarioService: InventarioService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit() {
     this.cargarInventario();
@@ -41,6 +45,7 @@ export class InventarioListaComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar inventario', err);
+        this.notificationService.error('Error al cargar inventario');
         this.isLoading = false;
       }
     });
@@ -78,12 +83,13 @@ export class InventarioListaComponent implements OnInit {
 
     this.inventarioService.update(this.selectedItem.idInventario, update).subscribe({
       next: () => {
+        this.notificationService.success('Stock actualizado correctamente');
         this.cargarInventario();
         this.closeModal();
       },
       error: (err) => {
         console.error('Error al actualizar stock', err);
-        alert('Error al actualizar stock');
+        this.notificationService.error('Error al actualizar stock');
       }
     });
   }

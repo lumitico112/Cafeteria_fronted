@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Subscription } from 'rxjs';
 import { Modulo } from '../../../core/models/auth.models';
 
@@ -20,6 +21,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -77,8 +79,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  logout(event: Event) {
+  async logout(event: Event) {
     event.preventDefault();
-    this.authService.logout();
+    const confirmed = await this.notificationService.confirm(
+      '¿Estás seguro que deseas cerrar sesión?',
+      'Sí, cerrar sesión'
+    );
+    
+    if (confirmed) {
+      this.authService.logout();
+    }
   }
 }

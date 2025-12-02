@@ -126,11 +126,22 @@ export class CarritoComponent implements OnInit {
       }
     }
 
+    // Format pickup time to ISO 8601 (YYYY-MM-DDTHH:mm:ss)
+    let formattedPickupTime: string | undefined;
+    if (this.deliveryType === 'RETIRO' && this.pickupTime) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      // pickupTime is usually HH:mm, we add :00 for seconds
+      formattedPickupTime = `${year}-${month}-${day}T${this.pickupTime}:00`;
+    }
+
     const pedido: PedidoCreate = {
       idUsuario: user.idUsuario, // If Employee, this is Employee's ID (acting as creator)
       tipoEntrega: this.deliveryType,
       direccionEntrega: this.deliveryType === 'DELIVERY' ? this.deliveryAddress : undefined,
-      fechaRecojo: this.deliveryType === 'RETIRO' ? this.pickupTime : undefined,
+      fechaRecojo: formattedPickupTime,
       detalles: this.cartItems.map(item => ({
         idProducto: item.producto.idProducto,
         cantidad: item.cantidad
@@ -159,13 +170,28 @@ export class CarritoComponent implements OnInit {
         error: (err) => {
           console.error('Error creating order', err);
           let errorMessage = 'Error al procesar el pedido. Intente nuevamente.';
+          
           if (err.error) {
-            if (typeof err.error === 'string') {
-              errorMessage = err.error;
-            } else if (err.error.message) {
-              errorMessage = err.error.message;
+            const backendMsg = typeof err.error === 'string' ? err.error : err.error.message;
+            
+            if (backendMsg) {
+              // Check for specific known errors
+              if (backendMsg.includes('Stock insuficiente')) {
+                errorMessage = 'No hay suficiente stock para completar el pedido de uno o más productos.';
+              } else if (backendMsg.includes('could not execute statement')) {
+                // Try to extract the message inside the first brackets if it looks like a business rule
+                const match = backendMsg.match(/\[(.*?)\]/);
+                if (match && match[1]) {
+                  errorMessage = match[1];
+                } else {
+                  errorMessage = 'Error interno del servidor al procesar el pedido.';
+                }
+              } else {
+                errorMessage = backendMsg;
+              }
             }
           }
+          
           this.notificationService.error(errorMessage);
         }
       });
@@ -248,9 +274,9 @@ export class CarritoComponent implements OnInit {
     y += 10;
 
     // Totals
-    const subtotal = this.lastOrderTotal;
-    const igv = subtotal * 0.18;
-    const total = subtotal * 1.18;
+    const total = this.lastOrderTotal;
+    const subtotal = total / 1.18;
+    const igv = total - subtotal;
 
     doc.text('Subtotal:', 140, y, { align: 'right' });
     doc.text(`S/ ${subtotal.toFixed(2)}`, 190, y, { align: 'right' });

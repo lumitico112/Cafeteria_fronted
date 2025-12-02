@@ -65,10 +65,10 @@ export class LoginComponent {
           }
 
           if (role === 'ADMIN' || role === 'EMPLEADO') {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/welcome']);
           } else {
             // Asumimos CLIENTE por defecto o si es explícito
-            this.router.navigate(['/']);
+            this.router.navigate(['/welcome']);
           }
         },
         error: (err) => {

@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { ProductosService } from '../productos.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Producto } from '../../../core/models/producto.model';
 import { FormsModule } from '@angular/forms';
 import { ProductoFormComponent } from '../producto-form/producto-form.component';
@@ -30,6 +31,7 @@ export class ProductosListaComponent implements OnInit {
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
     private authService: AuthService,
+    private notificationService: NotificationService,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -65,6 +67,7 @@ export class ProductosListaComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading products', err);
+        this.notificationService.error('Error al cargar productos');
         this.isLoading = false;
       }
     });
@@ -80,13 +83,19 @@ export class ProductosListaComponent implements OnInit {
     });
   }
 
-  deleteProducto(producto: Producto) {
-    if (confirm(`¿Está seguro de eliminar el producto "${producto.nombre}"?`)) {
+  async deleteProducto(producto: Producto) {
+    const confirmed = await this.notificationService.confirm(
+      `¿Está seguro de eliminar el producto "${producto.nombre}"?`,
+      'Sí, eliminar'
+    );
+
+    if (confirmed) {
       this.productosService.delete(producto.idProducto).subscribe({
         next: () => {
+          this.notificationService.success('Producto eliminado correctamente');
           this.loadProductos(); // Recargar lista
         },
-        error: (err) => alert('Error al eliminar producto')
+        error: (err) => this.notificationService.error('Error al eliminar producto')
       });
     }
   }
