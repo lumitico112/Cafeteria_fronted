@@ -40,7 +40,7 @@
         <!-- Links para autenticados -->
         @if (currentUser$ | async; as user) {
           <!-- Solo mostrar Dashboard si es ADMIN o EMPLEADO -->
-          @if (user.nombreRol === 'ADMIN' || user.nombreRol === 'EMPLEADO') {
+          @if (isAdminOrEmployee) {
             <li class="nav-item">
               <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
                 <i class="fas fa-tachometer-alt me-1"></i> Dashboard
@@ -49,7 +49,7 @@
           }
 
           <!-- Menú exclusivo de Cliente -->
-          @if (user.nombreRol !== 'ADMIN' && user.nombreRol !== 'EMPLEADO') {
+          @if (isClient) {
             <li class="nav-item me-3">
               <a class="nav-link position-relative" routerLink="/carrito">
                 <i class="fas fa-shopping-cart"></i>

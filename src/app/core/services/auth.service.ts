@@ -47,8 +47,19 @@ export class AuthService {
         tap((response) => {
           if (response.token && isPlatformBrowser(this.platformId)) {
             localStorage.setItem('jwt_token', response.token);
-            // No guardamos user_data aquí todavía, lo hará setCurrentUser
-            this.loadUserFromToken(response.token);
+            
+            // Construir objeto usuario desde la respuesta plana
+            const user = {
+              idUsuario: response.idUsuario,
+              nombre: response.nombre,
+              apellido: response.apellido,
+              email: response.email,
+              correo: response.email, // Compatibilidad
+              nombreRol: response.rol,
+              idRol: response.rol === 'ADMIN' ? 1 : (response.rol === 'EMPLEADO' ? 2 : 3) // Mapeo simple de ID
+            };
+
+            this.setCurrentUser(user);
           }
         })
       );
@@ -104,10 +115,11 @@ export class AuthService {
     // Priorizar nombreRol si existe
     if (user.nombreRol) return user.nombreRol;
     
-    // Verificar idRol
-    if (user.idRol === 1) return 'ADMIN';
-    if (user.idRol === 2) return 'EMPLEADO';
-    if (user.idRol === 3) return 'CLIENTE';
+    // Verificar idRol (manejar string o number)
+    const idRol = Number(user.idRol);
+    if (idRol === 1) return 'ADMIN';
+    if (idRol === 2) return 'EMPLEADO';
+    if (idRol === 3) return 'CLIENTE';
 
     // Verificar authorities (Spring Security standard)
     if (user.authorities) {

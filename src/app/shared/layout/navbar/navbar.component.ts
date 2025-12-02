@@ -38,4 +38,14 @@ export class NavbarComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  get isAdminOrEmployee(): boolean {
+    const role = this.authService.getRole();
+    return role === 'ADMIN' || role === 'EMPLEADO';
+  }
+
+  get isClient(): boolean {
+    const role = this.authService.getRole();
+    return role === 'CLIENTE';
+  }
 }

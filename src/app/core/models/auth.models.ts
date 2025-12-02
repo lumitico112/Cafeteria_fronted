@@ -17,6 +17,11 @@ export interface RegisterRequest {
 // Respuesta del Backend
 export interface AuthenticationResponse {
   token: string;
+  idUsuario: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  rol: string;
 }
 
 export interface User {
